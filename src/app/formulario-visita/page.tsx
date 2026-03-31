@@ -75,7 +75,7 @@ function defaultMachineData(): MachineData {
   return {
     horometro: "", kgMaquina: "", kgPiso: "", kgRecuperada: "",
     ampT1: "", ampT2: "",
-    granValues: Array(13).fill(0),
+    granValues: Array(13).fill(0) as number[],
     perfReal: "", perfIdeal: "",
     cambioGranalla: false, nuevaGranalla: "",
     comentarios: "",
@@ -710,7 +710,7 @@ export default function FormularioVisitaPage() {
             {/* KG/HR por máquina */}
             <SectionLabel>KG/HR por Máquina</SectionLabel>
             <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {clienteData && clienteData.maquinas.map((m, i) => {
+              {clienteData?.maquinas.map((m, i) => {
                 if (!maquinasChecked[i]) return null;
                 const md = machineData[i];
                 const kghr = kghrEdits[i] ?? { editing: false, value: "2.74", adjusted: false };
@@ -722,11 +722,11 @@ export default function FormularioVisitaPage() {
                     <div className="bg-white p-5">
                       <div className="flex justify-between border-b border-[#dde3ec] py-2 text-xs">
                         <span className="text-[#8494aa]">Horómetro actual</span>
-                        <span className="font-[family-name:var(--font-jetbrains)] text-[#0f2137]">{md?.horometro || "—"} hr</span>
+                        <span className="font-[family-name:var(--font-jetbrains)] text-[#0f2137]">{md?.horometro ?? "—"} hr</span>
                       </div>
                       <div className="flex justify-between border-b border-[#dde3ec] py-2 text-xs">
                         <span className="text-[#8494aa]">Estado</span>
-                        <span className="text-[#0f2137]">{md?.estado || "—"}</span>
+                        <span className="text-[#0f2137]">{md?.estado ?? "—"}</span>
                       </div>
                       <div className="flex items-center justify-between pt-3">
                         <span className="text-xs font-semibold text-[#3d4f63]">KG / HR</span>

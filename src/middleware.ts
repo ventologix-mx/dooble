@@ -22,8 +22,8 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Check email domain
-  const email = session.user.email as string | undefined;
-  if (!email || !email.endsWith(ALLOWED_DOMAIN)) {
+  const email = session.user.email;
+  if (!email?.endsWith(ALLOWED_DOMAIN)) {
     // Log out unauthorized user and redirect to login
     return NextResponse.redirect(new URL("/auth/logout", req.url));
   }
