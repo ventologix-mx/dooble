@@ -61,7 +61,7 @@ export default function HomePage() {
             <div className="flex items-center gap-4">
               <span className="text-xs text-[#8494aa]">{user.email}</span>
               <a
-                href="/api/auth/logout"
+                href="/auth/logout"
                 className="rounded border border-[#dde3ec] px-3 py-1.5 text-xs font-semibold text-[#8494aa] transition-colors hover:border-[#d63b3b] hover:text-[#d63b3b]"
               >
                 Cerrar Sesión

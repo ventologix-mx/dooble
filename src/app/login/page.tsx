@@ -23,16 +23,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#0f2137] to-[#1a5fa8]">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-[#0f2137] to-[#1a5fa8]">
       <div className="w-full max-w-md rounded-lg bg-white p-10 shadow-2xl">
         {/* Logo */}
         <div className="mb-8 text-center">
           <h1 className="font-[family-name:var(--font-barlow-condensed)] text-3xl font-black tracking-wider text-[#0f2137]">
-            DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
+            DOOBLE
           </h1>
-          <p className="mt-2 text-sm tracking-wide text-[#8494aa]">
-            Sistema de Gestión de Visitas Técnicas
-          </p>
         </div>
 
         {/* Divider */}
@@ -46,7 +43,7 @@ export default function LoginPage() {
 
         {/* Login Button */}
         <a
-          href="/api/auth/login"
+          href="/auth/login"
           className="flex w-full items-center justify-center gap-3 rounded-md bg-[#1a5fa8] px-6 py-3.5 font-semibold text-white transition-all hover:bg-[#134a87] hover:shadow-lg"
         >
           <svg

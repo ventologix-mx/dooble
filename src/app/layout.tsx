@@ -6,7 +6,7 @@ import { Auth0Provider } from "@auth0/nextjs-auth0/client";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
-  title: "DOOBLE-INOX",
+  title: "DOOBLE",
   description: "Sistema de gestión de visitas técnicas",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
