@@ -1,21 +1,355 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
-    output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
+  provider = "mysql"
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model clientes {
+  id_cliente           Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(255)
+  codigo               String?                @db.VarChar(50)
+  maquinas_maestra     maquinas_maestra[]
+  visitas_compras      visitas_compras[]
+  visitas_stock_bodega visitas_stock_bodega[]
+}
 
-    @@index([name])
+model contactos_maquina {
+  id_contacto      Int                    @id @default(autoincrement())
+  id_maquina       Int
+  rol              contactos_maquina_rol?
+  nombre           String?                @db.VarChar(255)
+  email            String?                @db.VarChar(255)
+  telefono         String?                @db.VarChar(50)
+  maquinas_maestra maquinas_maestra       @relation(fields: [id_maquina], references: [id_maquina], onDelete: NoAction, onUpdate: NoAction, map: "contactos_maquina_ibfk_1")
+
+  @@index([id_maquina], map: "id_maquina")
+}
+
+model granallas {
+  id_granalla                Int                          @id @default(0)
+  codigo_dooble              String?                      @db.VarChar(50)
+  numero_fabricante          String?                      @db.VarChar(100)
+  fabricante                 String?                      @db.VarChar(100)
+  subnombre_fabricante       String?                      @db.VarChar(100)
+  nominacion_comercial       String?                      @db.VarChar(150)
+  tipo_granalla_a_usar       String?                      @db.VarChar(100)
+  medidas                    String?                      @db.VarChar(100)
+  material_granalla          String?                      @db.VarChar(100)
+  forma_granalla             String?                      @db.VarChar(100)
+  detalle_material_granalla  String?                      @db.Text
+  densidad_especifica        Decimal?                     @db.Decimal(5, 2)
+  densidad_aparente          Decimal?                     @db.Decimal(5, 2)
+  dureza_rc                  Decimal?                     @db.Decimal(5, 1)
+  microestructura            String?                      @db.Text
+  factor_x_costo             String?                      @db.VarChar(50)
+  costo_usd_kg               Decimal?                     @db.Decimal(10, 4)
+  granallas_control_limites  granallas_control_limites[]
+  granallas_granulometria    granallas_granulometria[]
+  granallas_quimica          granallas_quimica[]          @ignore
+  visitas_compras            visitas_compras[]
+  visitas_granalla_instalada visitas_granalla_instalada[]
+  visitas_stock_bodega       visitas_stock_bodega[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model granallas_control_limites {
+  id                         Int       @id @default(autoincrement())
+  id_granalla                Int       @default(0)
+  porcentaje_grano_ideal_max Decimal?  @db.Decimal(6, 2)
+  porcentaje_grano_ideal_min Decimal?  @db.Decimal(6, 2)
+  tipo_grano_max             String?   @db.VarChar(20)
+  tipo_grano_min             String?   @db.VarChar(20)
+  granallas                  granallas @relation(fields: [id_granalla], references: [id_granalla], onDelete: NoAction, onUpdate: NoAction, map: "granallas_control_limites_ibfk_1")
+
+  @@index([id_granalla], map: "id_granalla")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model granallas_granulometria {
+  id          Int                          @id @default(autoincrement())
+  id_granalla Int
+  tipo        granallas_granulometria_tipo
+  malla_mm    Decimal?                     @db.Decimal(5, 3)
+  malla_label String?                      @db.VarChar(20)
+  proporcion  Decimal?                     @db.Decimal(6, 4)
+  granallas   granallas                    @relation(fields: [id_granalla], references: [id_granalla], onDelete: NoAction, onUpdate: NoAction, map: "gg_fk_granalla")
+
+  @@index([id_granalla], map: "idx_id_granalla")
+  @@index([tipo, malla_mm], map: "idx_tipo_malla")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model granallas_quimica {
+  id_granalla Int       @default(0)
+  c_min       Decimal?  @db.Decimal(8, 4)
+  c_max       Decimal?  @db.Decimal(8, 4)
+  cr_min      Decimal?  @db.Decimal(8, 4)
+  cr_max      Decimal?  @db.Decimal(8, 4)
+  ni_min      Decimal?  @db.Decimal(8, 4)
+  ni_max      Decimal?  @db.Decimal(8, 4)
+  si_min      Decimal?  @db.Decimal(8, 4)
+  si_max      Decimal?  @db.Decimal(8, 4)
+  mn_min      Decimal?  @db.Decimal(8, 4)
+  mn_max      Decimal?  @db.Decimal(8, 4)
+  s_min       Decimal?  @db.Decimal(8, 4)
+  s_max       Decimal?  @db.Decimal(8, 4)
+  p_min       Decimal?  @db.Decimal(8, 4)
+  p_max       Decimal?  @db.Decimal(8, 4)
+  zn_min      Decimal?  @db.Decimal(8, 4)
+  zn_max      Decimal?  @db.Decimal(8, 4)
+  al_min      Decimal?  @db.Decimal(8, 4)
+  al_max      Decimal?  @db.Decimal(8, 4)
+  fe_min      Decimal?  @db.Decimal(8, 4)
+  fe_max      Decimal?  @db.Decimal(8, 4)
+  granallas   granallas @relation(fields: [id_granalla], references: [id_granalla], onDelete: NoAction, onUpdate: NoAction, map: "granallas_quimica_ibfk_1")
+
+  @@index([id_granalla], map: "id_granalla")
+  @@ignore
+}
+
+model maquinas_especificaciones {
+  id_maquina               Int              @id
+  voltaje                  Int?             @db.UnsignedInt
+  anio_fabricacion         Int?             @db.UnsignedSmallInt
+  tipo_horometro           String?          @db.VarChar(100)
+  tipo_conexion_horometro  String?          @db.VarChar(100)
+  capacidad_silo_kg        Decimal?         @db.Decimal(8, 2)
+  silo_ancho               Decimal?         @db.Decimal(5, 3)
+  silo_largo               Decimal?         @db.Decimal(5, 3)
+  silo_alto                Decimal?         @db.Decimal(5, 3)
+  puntos_muertos_kg        Decimal?         @db.Decimal(8, 2)
+  sistema_control          String?          @db.VarChar(100)
+  blindajes_cabina_reorden String?          @db.Text
+  maquinas_maestra         maquinas_maestra @relation(fields: [id_maquina], references: [id_maquina], onDelete: NoAction, onUpdate: NoAction, map: "maquinas_especificaciones_ibfk_1")
+}
+
+model maquinas_maestra {
+  id_maquina                Int                        @id @default(autoincrement())
+  numero_inplant            String?                    @unique(map: "numero_inplant") @db.VarChar(100)
+  maquina_por_cliente       String?                    @db.VarChar(255)
+  marca                     String?                    @db.VarChar(100)
+  modelo                    String?                    @db.VarChar(100)
+  serie                     String?                    @db.VarChar(100)
+  tipo_maquina              String?                    @db.VarChar(100)
+  id_cliente                Int?
+  contactos_maquina         contactos_maquina[]
+  maquinas_especificaciones maquinas_especificaciones?
+  clientes                  clientes?                  @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "maquinas_maestra_ibfk_1")
+  maquinas_turbinas         maquinas_turbinas?
+  visitas_encabezado        visitas_encabezado[]
+
+  @@index([id_cliente], map: "id_cliente")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model maquinas_turbinas {
+  id_maquina                   Int              @id
+  cantidad_turbinas            Int?
+  marcas_repuestos             String?          @db.Text
+  vida_blindajes               Int?             @db.UnsignedInt
+  tamano_apertura_caja_control String?          @db.VarChar(150)
+  vida_impulsor                Int?             @db.UnsignedInt
+  cant_paletas                 Int?
+  forma_paletas                String?          @db.VarChar(100)
+  vida_paletas                 Int?             @db.UnsignedInt
+  rpm_nominal                  Int?
+  potencia_hp                  Decimal?         @db.Decimal(6, 2)
+  amp_vacio                    Decimal?         @db.Decimal(5, 1)
+  amp_maximo                   Decimal?         @db.Decimal(5, 1)
+  maquinas_maestra             maquinas_maestra @relation(fields: [id_maquina], references: [id_maquina], onDelete: NoAction, onUpdate: NoAction, map: "maquinas_turbinas_ibfk_1")
+}
+
+model visitas_amperajes {
+  id_amp             Int                 @id @default(autoincrement())
+  id_visita          Int?
+  num_turbina        Int?
+  amperaje_real      Decimal?            @db.Decimal(10, 2)
+  visitas_encabezado visitas_encabezado? @relation(fields: [id_visita], references: [id_visita], onDelete: NoAction, onUpdate: NoAction, map: "visitas_amperajes_ibfk_1")
+
+  @@index([id_visita], map: "id_visita")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model visitas_compras {
+  id                          Int                       @id @default(autoincrement())
+  id_cliente                  Int
+  fecha_visita                DateTime                  @db.Date
+  proveedor                   visitas_compras_proveedor
+  id_granalla                 Int?
+  nombre_granalla_competencia String?                   @db.VarChar(150)
+  kg_comprados                Decimal                   @db.Decimal(10, 2)
+  orden_venta                 String?                   @db.VarChar(50)
+  notas                       String?                   @db.Text
+  created_at                  DateTime?                 @default(now()) @db.Timestamp(0)
+  clientes                    clientes                  @relation(fields: [id_cliente], references: [id_cliente], map: "vc_fk_cliente")
+  granallas                   granallas?                @relation(fields: [id_granalla], references: [id_granalla], onDelete: Restrict, map: "vc_fk_granalla")
+
+  @@index([id_cliente, fecha_visita], map: "idx_cliente_fecha")
+  @@index([id_granalla], map: "idx_id_granalla")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model visitas_encabezado {
+  id_visita                  Int                                       @id @default(autoincrement())
+  numero_maquina_inf         String?                                   @db.VarChar(50)
+  id_maquina                 Int?
+  fecha_visita               DateTime?                                 @db.Date
+  horometro_lectura          BigInt?
+  comentarios                String?                                   @db.Text
+  consecutivo_reporte        Int?
+  kg_bodega                  Decimal?                                  @db.Decimal(10, 2)
+  evaluacion_estado          visitas_encabezado_evaluacion_estado?
+  recomendaciones_maquina    String?                                   @db.Text
+  evaluacion_eficiencia      visitas_encabezado_evaluacion_eficiencia?
+  recomendaciones_proceso    String?                                   @db.Text
+  visitas_amperajes          visitas_amperajes[]
+  maquinas_maestra           maquinas_maestra?                         @relation(fields: [id_maquina], references: [id_maquina], onDelete: Restrict, map: "ve_fk_id_maquina")
+  visitas_granalla_instalada visitas_granalla_instalada[]
+  visitas_granulometria      visitas_granulometria[]
+  visitas_lecturas_kghr      visitas_lecturas_kghr[]
+  visitas_performance_grano  visitas_performance_grano[]
+  visitas_stock_maquina      visitas_stock_maquina?
+
+  @@index([id_maquina], map: "idx_id_maquina")
+  @@index([numero_maquina_inf], map: "numero_maquina_inf")
+}
+
+model visitas_granalla_instalada {
+  id_gran_inst       Int                 @id @default(autoincrement())
+  id_visita          Int?
+  id_granalla        Int?
+  codigo_inplant     String?             @db.VarChar(50)
+  nombre_granalla    String?             @db.VarChar(150)
+  medida             String?             @db.VarChar(50)
+  detalle_material   String?             @db.VarChar(100)
+  comentarios        String?             @db.Text
+  granallas          granallas?          @relation(fields: [id_granalla], references: [id_granalla], onDelete: Restrict, map: "vgi_fk_id_granalla")
+  visitas_encabezado visitas_encabezado? @relation(fields: [id_visita], references: [id_visita], onDelete: NoAction, onUpdate: NoAction, map: "visitas_granalla_instalada_ibfk_1")
+
+  @@index([id_visita], map: "id_visita")
+  @@index([id_granalla], map: "idx_id_granalla")
+}
+
+model visitas_granulometria {
+  id_gran            Int                                 @id @default(autoincrement())
+  id_visita          Int?
+  tipo_muestra       visitas_granulometria_tipo_muestra?
+  malla              String?                             @db.VarChar(10)
+  peso_gramos        Decimal?                            @db.Decimal(10, 2)
+  visitas_encabezado visitas_encabezado?                 @relation(fields: [id_visita], references: [id_visita], onDelete: NoAction, onUpdate: NoAction, map: "visitas_granulometria_ibfk_1")
+
+  @@index([id_visita], map: "id_visita")
+}
+
+model visitas_lecturas_kghr {
+  id                 Int                 @id @default(autoincrement())
+  id_visita          Int?
+  fecha_lectura      DateTime?           @db.Date
+  kg_hr              Decimal?            @db.Decimal(8, 3)
+  visitas_encabezado visitas_encabezado? @relation(fields: [id_visita], references: [id_visita], onDelete: NoAction, onUpdate: NoAction, map: "visitas_lecturas_kghr_ibfk_1")
+
+  @@index([id_visita], map: "id_visita")
+}
+
+model visitas_performance_grano {
+  id_perf            Int                 @id @default(autoincrement())
+  id_visita          Int?
+  porcentaje_ideal   Decimal?            @db.Decimal(10, 2)
+  porcentaje_real    Decimal?            @db.Decimal(10, 2)
+  variacion          Decimal?            @db.Decimal(10, 2)
+  visitas_encabezado visitas_encabezado? @relation(fields: [id_visita], references: [id_visita], onDelete: NoAction, onUpdate: NoAction, map: "visitas_performance_grano_ibfk_1")
+
+  @@index([id_visita], map: "id_visita")
+}
+
+model visitas_quimica {
+  id_quimica Int      @id @default(autoincrement())
+  id_visita  Int?     @unique(map: "id_visita")
+  C_min      Decimal? @db.Decimal(10, 4)
+  C_max      Decimal? @db.Decimal(10, 4)
+  Si_min     Decimal? @db.Decimal(10, 4)
+  Si_max     Decimal? @db.Decimal(10, 4)
+  Mn_min     Decimal? @db.Decimal(10, 4)
+  Mn_max     Decimal? @db.Decimal(10, 4)
+  P_min      Decimal? @db.Decimal(10, 4)
+  P_max      Decimal? @db.Decimal(10, 4)
+  S_min      Decimal? @db.Decimal(10, 4)
+  S_max      Decimal? @db.Decimal(10, 4)
+  Cr_min     Decimal? @db.Decimal(10, 4)
+  Cr_max     Decimal? @db.Decimal(10, 4)
+  Ni_min     Decimal? @db.Decimal(10, 4)
+  Ni_max     Decimal? @db.Decimal(10, 4)
+  Mo_min     Decimal? @db.Decimal(10, 4)
+  Mo_max     Decimal? @db.Decimal(10, 4)
+  Cu_min     Decimal? @db.Decimal(10, 4)
+  Cu_max     Decimal? @db.Decimal(10, 4)
+  Fe_min     Decimal? @db.Decimal(10, 4)
+  Fe_max     Decimal? @db.Decimal(10, 4)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model visitas_stock_bodega {
+  id           Int       @id @default(autoincrement())
+  id_cliente   Int
+  fecha_visita DateTime  @db.Date
+  id_granalla  Int
+  kg_bodega    Decimal?  @db.Decimal(10, 2)
+  notas        String?   @db.Text
+  created_at   DateTime? @default(now()) @db.Timestamp(0)
+  clientes     clientes  @relation(fields: [id_cliente], references: [id_cliente], map: "vsb_fk_cliente")
+  granallas    granallas @relation(fields: [id_granalla], references: [id_granalla], map: "vsb_fk_granalla")
+
+  @@unique([id_cliente, fecha_visita, id_granalla], map: "uq_cliente_fecha_granalla")
+  @@index([id_cliente], map: "idx_id_cliente")
+  @@index([id_granalla], map: "idx_id_granalla")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model visitas_stock_maquina {
+  id                 Int                @id @default(autoincrement())
+  id_visita          Int                @unique(map: "uq_id_visita")
+  kg_en_maquina      Decimal?           @db.Decimal(8, 2)
+  kg_piso            Decimal?           @db.Decimal(8, 2)
+  kg_recuperada      Decimal?           @db.Decimal(8, 2)
+  created_at         DateTime?          @default(now()) @db.Timestamp(0)
+  visitas_encabezado visitas_encabezado @relation(fields: [id_visita], references: [id_visita], onDelete: Cascade, map: "vsm_fk_visita")
+}
+
+enum contactos_maquina_rol {
+  Champion
+  Machine_User      @map("Machine User")
+  Stock_Manager     @map("Stock Manager")
+  Contacto_In_Plant @map("Contacto In-Plant")
+}
+
+enum granallas_granulometria_tipo {
+  MIX_IDEAL
+  NUEVO_TEORICO
+}
+
+enum visitas_granulometria_tipo_muestra {
+  MIX
+  DESCARTE
+  COLECTOR
+}
+
+enum visitas_compras_proveedor {
+  DOOBLE
+  COMPETENCIA
+}
+
+enum visitas_encabezado_evaluacion_estado {
+  OPTIMA
+  BUENAS_CONDICIONES @map("BUENAS CONDICIONES")
+  FUNCIONAL
+  INOPERABLE
+}
+
+enum visitas_encabezado_evaluacion_eficiencia {
+  EFICIENTE__PARAMETROS_DENTRO_DE_RANGO   @map("EFICIENTE: PARAMETROS DENTRO DE RANGO")
+  INEFICIENTE__PARAMETROS_FUERA_DE_RANGO  @map("INEFICIENTE: PARAMETROS FUERA DE RANGO")
+  INEFICIENTE__PARAMETROS_DENTRO_DE_RANGO @map("INEFICIENTE: PARAMETROS DENTRO DE RANGO")
 }

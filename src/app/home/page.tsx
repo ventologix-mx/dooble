@@ -50,10 +50,10 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
-          <h1 className="font-[family-name:var(--font-barlow-condensed)] text-base font-black tracking-wider text-[#0f2137]">
+          <h1 className="font-(family-name:--font-barlow-condensed) text-base font-black tracking-wider text-[#0f2137]">
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
           </h1>
-          <span className="font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold tracking-wide text-[#8494aa] uppercase">
+          <span className="font-(family-name:--font-barlow-condensed) text-sm font-semibold tracking-wide text-[#8494aa] uppercase">
             In-Plant Support
           </span>
           <div className="flex-1" />
@@ -74,7 +74,7 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="mx-auto max-w-5xl px-6 py-12">
         <div className="mb-10">
-          <h2 className="font-[family-name:var(--font-barlow-condensed)] text-3xl font-bold text-[#0f2137]">
+          <h2 className="font-(family-name:--font-barlow-condensed) text-3xl font-bold text-[#0f2137]">
             Bienvenido{user?.name ? `, ${user.name}` : ""}
           </h2>
           <p className="mt-2 text-sm text-[#8494aa]">
@@ -91,7 +91,7 @@ export default function HomePage() {
               className={`group rounded-lg border border-[#dde3ec] border-t-[3px] ${route.color} bg-white p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md`}
             >
               <div className={`mb-4 ${route.iconColor}`}>{route.icon}</div>
-              <h3 className="font-[family-name:var(--font-barlow-condensed)] text-xl font-bold text-[#0f2137] group-hover:text-[#1a5fa8]">
+              <h3 className="font-(family-name:--font-barlow-condensed) text-xl font-bold text-[#0f2137] group-hover:text-[#1a5fa8]">
                 {route.title}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-[#8494aa]">

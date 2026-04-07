@@ -3,6 +3,7 @@ import { PrismaClient } from "../../generated/prisma";
 
 const createPrismaClient = () =>
   new PrismaClient({
+    datasources: { db: { url: env.DATABASE_URL } },
     log:
       env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
