@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, type RouterOutputs } from "~/trpc/react";
@@ -62,6 +62,7 @@ interface MachineData {
   recMaquina: string;
   recProceso: string;
   kghr: string;
+  kghrAjustado: boolean;
 }
 
 type MaquinaDB = RouterOutputs["maquinas"]["listByCliente"][number];
@@ -89,7 +90,7 @@ function defaultMachineData(m: MaquinaDB): MachineData {
     },
     estado: visitas_encabezado_evaluacion_estado.BUENAS_CONDICIONES,
     eficiencia: visitas_encabezado_evaluacion_eficiencia.EFICIENTE__PARAMETROS_DENTRO_DE_RANGO,
-    recMaquina: "", recProceso: "", kghr: "",
+    recMaquina: "", recProceso: "", kghr: "", kghrAjustado: false,
   };
 }
 
@@ -149,6 +150,10 @@ export default function FormularioVisitaPage() {
       { enabled: clienteId !== null },
     );
   const { data: granallasDB = [] } = api.granallas.list.useQuery();
+  const { data: stockAnterior } = api.visitas.getStockAnterior.useQuery(
+    { id_cliente: clienteId!, fecha },
+    { enabled: clienteId !== null },
+  );
 
   // Initialize machine state when DB data arrives for a new client
   if (
@@ -237,6 +242,89 @@ export default function FormularioVisitaPage() {
   const maquinasVisitadas = maquinasChecked.filter(Boolean).length;
   const isSaving = createVisita.isPending;
 
+  // ── KG/HR calculado por máquina ──────────────────────────────────────────
+  const kghrCalculados = useMemo(() => {
+    const result: Record<number, number | null> = {};
+    const visitadas = machineData.filter((_, i) => maquinasChecked[i]);
+    if (visitadas.length === 0) return result;
+
+    // Stock anterior total
+    const bodegaAnt = (stockAnterior?.bodegaAnterior ?? []).reduce(
+      (s, b) => s + b.kg_bodega,
+      0,
+    );
+    const stockMaqAnt = stockAnterior?.stockMaquinasAnt ?? {};
+    const pisoAnt = Object.values(stockMaqAnt).reduce(
+      (s, m) => s + m.kg_piso,
+      0,
+    );
+    const recuperadaAnt = Object.values(stockMaqAnt).reduce(
+      (s, m) => s + m.kg_recuperada,
+      0,
+    );
+    const enMaquinaAnt = Object.values(stockMaqAnt).reduce(
+      (s, m) => s + m.kg_en_maquina,
+      0,
+    );
+    const stockTotalAnt = bodegaAnt + pisoAnt + recuperadaAnt + enMaquinaAnt;
+
+    // Stock actual total (solo máquinas visitadas)
+    const bodegaAct = bodegaRows.reduce(
+      (s, r) => s + (parseFloat(r.kg) || 0),
+      0,
+    );
+    const pisoAct = visitadas.reduce(
+      (s, m) => s + (parseFloat(m.kgPiso) || 0),
+      0,
+    );
+    const recuperadaAct = visitadas.reduce(
+      (s, m) => s + (parseFloat(m.kgRecuperada) || 0),
+      0,
+    );
+    const enMaquinaAct = visitadas.reduce(
+      (s, m) => s + (parseFloat(m.kgMaquina) || 0),
+      0,
+    );
+    const stockTotalAct = bodegaAct + pisoAct + recuperadaAct + enMaquinaAct;
+
+    // Compras del periodo
+    const comprasPeriodo = compraRows.reduce(
+      (s, r) => s + (parseFloat(r.kg) || 0),
+      0,
+    );
+
+    const consumoPeriodo = stockTotalAnt + comprasPeriodo - stockTotalAct;
+
+    // Proration: factor = (HP × delta) / Σ(HP × delta)
+    const deltas = visitadas.map((m) => {
+      const mdb = maquinasDB.find((x) => x.id_maquina === m.id_maquina);
+      const horAnt = mdb?.ultima_visita_horometro ?? 0;
+      const horAct = parseFloat(m.horometro) || 0;
+      return Math.max(0, horAct - horAnt);
+    });
+
+    const sumHpDelta = visitadas.reduce((s, m, i) => {
+      const mdb = maquinasDB.find((x) => x.id_maquina === m.id_maquina);
+      const hp = mdb?.potencia_hp ?? 0;
+      return s + hp * (deltas[i] ?? 0);
+    }, 0);
+
+    visitadas.forEach((m, i) => {
+      const mdb = maquinasDB.find((x) => x.id_maquina === m.id_maquina);
+      const hp = mdb?.potencia_hp ?? 0;
+      const delta = deltas[i] ?? 0;
+      if (delta === 0 || sumHpDelta === 0) {
+        result[m.id_maquina] = null;
+        return;
+      }
+      const factor = (hp * delta) / sumHpDelta;
+      const consumoM = consumoPeriodo * factor;
+      result[m.id_maquina] = consumoM / delta;
+    });
+
+    return result;
+  }, [machineData, maquinasChecked, bodegaRows, compraRows, stockAnterior, maquinasDB]);
+
   const goToStep = (n: number) => { if (n >= 1 && n <= 4) setStep(n); };
 
   // ── Save ─────────────────────────────────────────────────────────────────
@@ -290,6 +378,7 @@ export default function FormularioVisitaPage() {
           performance_real: m.perfReal ? parseFloat(m.perfReal) : undefined,
           performance_ideal: m.perfIdeal ? parseFloat(m.perfIdeal) : undefined,
           kg_hr: m.kghr ? parseFloat(m.kghr) : undefined,
+          ajustado_manual: m.kghrAjustado,
           granalla_instalada: m.granallInstalada.nombre_granalla
             ? {
                 id_granalla: m.cambioGranalla
@@ -858,6 +947,11 @@ export default function FormularioVisitaPage() {
                 if (!maquinasChecked[i]) return null;
                 const md = machineData[i];
                 if (!md) return null;
+                const calculado = kghrCalculados[m.id_maquina];
+                const calculadoStr =
+                  calculado !== null && calculado !== undefined
+                    ? calculado.toFixed(2)
+                    : null;
                 return (
                   <div key={m.id_maquina} className="overflow-hidden rounded-md border border-[#dde3ec]">
                     <div className="bg-[#0f2137] px-5 py-3">
@@ -874,14 +968,49 @@ export default function FormularioVisitaPage() {
                         <span className="text-[#8494aa]">Estado</span>
                         <span className="text-[#0f2137]">{md.estado.replace(/_/g, " ")}</span>
                       </div>
+                      {calculadoStr && !md.kghrAjustado && (
+                        <div className="flex justify-between border-b border-[#dde3ec] py-2 text-xs">
+                          <span className="text-[#8494aa]">KG/HR calculado</span>
+                          <span className="font-(family-name:--font-jetbrains) font-semibold text-[#1a9e5c]">{calculadoStr}</span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between pt-3">
-                        <span className="text-xs font-semibold text-[#3d4f63]">KG / HR</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-[#3d4f63]">KG / HR</span>
+                          {md.kghrAjustado && (
+                            <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[9px] font-bold tracking-wider text-[#d4860a] uppercase">
+                              Ajustado
+                            </span>
+                          )}
+                        </div>
                         <input
                           type="number"
                           step="0.01"
-                          placeholder="—"
+                          placeholder={calculadoStr ?? "—"}
                           value={md.kghr}
-                          onChange={(e) => setMachineData((prev) => prev.map((x, j) => j === i ? { ...x, kghr: e.target.value } : x))}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const isManual = calculadoStr
+                              ? val !== calculadoStr
+                              : val !== "";
+                            setMachineData((prev) =>
+                              prev.map((x, j) =>
+                                j === i
+                                  ? { ...x, kghr: val, kghrAjustado: isManual }
+                                  : x,
+                              ),
+                            );
+                          }}
+                          onFocus={() => {
+                            // Pre-fill with calculated value on first focus if empty
+                            if (!md.kghr && calculadoStr) {
+                              setMachineData((prev) =>
+                                prev.map((x, j) =>
+                                  j === i ? { ...x, kghr: calculadoStr } : x,
+                                ),
+                              );
+                            }
+                          }}
                           className="w-24 rounded border border-[#1a5fa8] px-2 py-1 text-center font-(family-name:--font-jetbrains) text-sm font-bold text-[#1a5fa8] outline-none"
                         />
                       </div>

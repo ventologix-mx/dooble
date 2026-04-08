@@ -36,6 +36,7 @@ const maquinaInput = z.object({
   performance_real: z.number().optional(),
   performance_ideal: z.number().optional(),
   kg_hr: z.number().optional(),
+  ajustado_manual: z.boolean().optional(),
   granalla_instalada: z
     .object({
       id_granalla: z.number().optional(),
@@ -185,6 +186,68 @@ export const visitasRouter = createTRPCRouter({
       });
     }),
 
+  // Stock anterior por cliente (para calcular KG/HR en el formulario)
+  getStockAnterior: publicProcedure
+    .input(z.object({ id_cliente: z.number(), fecha: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const fecha = new Date(input.fecha);
+
+      // Última fecha de bodega anterior para este cliente
+      const lastBodegaEntry = await ctx.db.visitas_stock_bodega.findFirst({
+        where: { id_cliente: input.id_cliente, fecha_visita: { lt: fecha } },
+        orderBy: { fecha_visita: "desc" },
+        select: { fecha_visita: true },
+      });
+
+      const bodegaAnterior = lastBodegaEntry?.fecha_visita
+        ? await ctx.db.visitas_stock_bodega.findMany({
+            where: {
+              id_cliente: input.id_cliente,
+              fecha_visita: lastBodegaEntry.fecha_visita,
+            },
+            select: { id_granalla: true, kg_bodega: true },
+          })
+        : [];
+
+      // Última stock en máquina por máquina del cliente
+      const maquinas = await ctx.db.maquinas_maestra.findMany({
+        where: { id_cliente: input.id_cliente },
+        select: { id_maquina: true },
+      });
+
+      const stockMaquinasAnt: Record<
+        number,
+        { kg_en_maquina: number; kg_piso: number; kg_recuperada: number }
+      > = {};
+
+      for (const m of maquinas) {
+        const lastVisita = await ctx.db.visitas_encabezado.findFirst({
+          where: { id_maquina: m.id_maquina, fecha_visita: { lt: fecha } },
+          orderBy: { fecha_visita: "desc" },
+          include: { visitas_stock_maquina: true },
+        });
+        if (lastVisita?.visitas_stock_maquina) {
+          stockMaquinasAnt[m.id_maquina] = {
+            kg_en_maquina: Number(
+              lastVisita.visitas_stock_maquina.kg_en_maquina ?? 0,
+            ),
+            kg_piso: Number(lastVisita.visitas_stock_maquina.kg_piso ?? 0),
+            kg_recuperada: Number(
+              lastVisita.visitas_stock_maquina.kg_recuperada ?? 0,
+            ),
+          };
+        }
+      }
+
+      return {
+        bodegaAnterior: bodegaAnterior.map((b) => ({
+          id_granalla: b.id_granalla,
+          kg_bodega: Number(b.kg_bodega ?? 0),
+        })),
+        stockMaquinasAnt,
+      };
+    }),
+
   // Crea una visita completa (todas las tablas relacionadas)
   create: publicProcedure
     .input(createVisitaInput)
@@ -323,6 +386,7 @@ export const visitasRouter = createTRPCRouter({
                 id_visita: visita.id_visita,
                 fecha_lectura: fecha,
                 kg_hr: m.kg_hr,
+                ajustado_manual: m.ajustado_manual ? 1 : 0,
               },
             });
           }

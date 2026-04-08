@@ -179,6 +179,10 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
     kghrData.length > 0
       ? Number(kghrData[kghrData.length - 1]?.kg_hr ?? 0)
       : null;
+  const kghrAjustado =
+    kghrData.length > 0
+      ? (kghrData[kghrData.length - 1]?.ajustado_manual ?? 0) === 1
+      : false;
 
   const kghrMin = Math.min(...kghrData.map((k) => Number(k.kg_hr ?? 0)));
   const kghrMax = Math.max(...kghrData.map((k) => Number(k.kg_hr ?? 0)), 0.01);
@@ -494,8 +498,15 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                 </div>
                 {kghrActual !== null && (
                   <div className="text-right">
-                    <div className="font-(family-name:--font-jetbrains) text-[22px] font-bold text-[#1a5fa8]">
-                      {kghrActual.toFixed(2)}
+                    <div className="flex items-center justify-end gap-2">
+                      <div className="font-(family-name:--font-jetbrains) text-[22px] font-bold text-[#1a5fa8]">
+                        {kghrActual.toFixed(2)}
+                      </div>
+                      {kghrAjustado && (
+                        <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[9px] font-bold tracking-wider text-[#d4860a] uppercase">
+                          Ajustado
+                        </span>
+                      )}
                     </div>
                     <div className="text-[10px] tracking-wider text-[#8494aa] uppercase">
                       KG / HR actual

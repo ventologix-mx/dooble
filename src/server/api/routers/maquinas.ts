@@ -49,6 +49,9 @@ export const maquinasRouter = createTRPCRouter({
             marca: m.marca,
             modelo: m.modelo,
             cantidad_turbinas: m.maquinas_turbinas?.cantidad_turbinas ?? 2,
+            potencia_hp: m.maquinas_turbinas?.potencia_hp
+              ? Number(m.maquinas_turbinas.potencia_hp)
+              : null,
             amp_vacio: m.maquinas_turbinas?.amp_vacio
               ? Number(m.maquinas_turbinas.amp_vacio)
               : null,

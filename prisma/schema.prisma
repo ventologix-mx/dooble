@@ -250,6 +250,7 @@ model visitas_lecturas_kghr {
   id_visita          Int?
   fecha_lectura      DateTime?           @db.Date
   kg_hr              Decimal?            @db.Decimal(8, 3)
+  ajustado_manual    Int?                @default(0) @db.TinyInt
   visitas_encabezado visitas_encabezado? @relation(fields: [id_visita], references: [id_visita], onDelete: NoAction, onUpdate: NoAction, map: "visitas_lecturas_kghr_ibfk_1")
 
   @@index([id_visita], map: "id_visita")
