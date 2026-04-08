@@ -86,7 +86,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
   const turbinas = maquina?.maquinas_turbinas;
   const cliente = maquina?.clientes;
   const ingeniero = maquina?.contactos_maquina?.find(
-    (c) => c.rol === "Ingeniero" || c.rol === "inplant",
+    (c) => c.rol === "Contacto_In_Plant" || c.rol === "Champion",
   );
 
   const horometro = Number(visita.horometro_lectura ?? 0);
@@ -113,7 +113,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
       name: `T${i + 1}`,
       pct,
       hours: horometro,
-      status: pctToStatus(100 - pct) as "good" | "warn" | "crit",
+      status: pctToStatus(100 - pct),
       amp: amp ? Number(amp.amperaje_real) : null,
     };
   });

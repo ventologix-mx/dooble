@@ -125,7 +125,7 @@ export const visitasRouter = createTRPCRouter({
       const granulometriaIdeal =
         idGranallas.length > 0
           ? await ctx.db.granallas_granulometria.findMany({
-              where: { id_granalla: { in: idGranallas }, tipo: "ideal" },
+              where: { id_granalla: { in: idGranallas }, tipo: "MIX_IDEAL" },
               orderBy: { malla_mm: "desc" },
             })
           : [];
