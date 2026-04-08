@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import {
   visitas_encabezado_evaluacion_estado,
   visitas_encabezado_evaluacion_eficiencia,
@@ -64,9 +64,7 @@ interface MachineData {
   kghr: string;
 }
 
-type MaquinaDB = NonNullable<
-  ReturnType<typeof api.maquinas.listByCliente.useQuery>["data"]
->[number];
+type MaquinaDB = RouterOutputs["maquinas"]["listByCliente"][number];
 
 function defaultMachineData(m: MaquinaDB): MachineData {
   return {
