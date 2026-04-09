@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, type RouterOutputs } from "~/trpc/react";
+import { LoadingToast } from "~/components/LoadingToast";
 import {
   visitas_encabezado_evaluacion_estado,
   visitas_encabezado_evaluacion_eficiencia,
@@ -143,17 +144,20 @@ export default function FormularioVisitaPage() {
   const initializedClientRef = useRef<number | null>(null);
 
   // ── Queries ──────────────────────────────────────────────────────────────
-  const { data: clientes = [] } = api.clientes.list.useQuery();
-  const { data: maquinasDB = [], isLoading: loadingMaquinas } =
+  const { data: clientes = [], isFetching: fetchingClientes } = api.clientes.list.useQuery();
+  const { data: maquinasDB = [], isLoading: loadingMaquinas, isFetching: fetchingMaquinas } =
     api.maquinas.listByCliente.useQuery(
       { id_cliente: clienteId! },
       { enabled: clienteId !== null },
     );
-  const { data: granallasDB = [] } = api.granallas.list.useQuery();
-  const { data: stockAnterior } = api.visitas.getStockAnterior.useQuery(
+  const { data: granallasDB = [], isFetching: fetchingGranallas } = api.granallas.list.useQuery();
+  const { data: stockAnterior, isFetching: fetchingStock } = api.visitas.getStockAnterior.useQuery(
     { id_cliente: clienteId!, fecha },
     { enabled: clienteId !== null },
   );
+
+  const isLoadingAny =
+    fetchingClientes || fetchingMaquinas || fetchingGranallas || fetchingStock;
 
   // Initialize machine state when DB data arrives for a new client
   if (
@@ -1037,6 +1041,8 @@ export default function FormularioVisitaPage() {
           </div>
         )}
       </div>
+
+      <LoadingToast loading={isLoadingAny} />
 
       {/* Footer fijo */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#dde3ec] bg-white shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">

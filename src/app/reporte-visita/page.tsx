@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { api } from "~/trpc/react";
+import { LoadingToast } from "~/components/LoadingToast";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -55,7 +56,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 // ─── main report ─────────────────────────────────────────────────────────────
 
 function ReporteContent({ idVisita }: { idVisita: number }) {
-  const { data, isLoading, error } = api.visitas.getReporte.useQuery(
+  const { data, isLoading, isFetching, error } = api.visitas.getReporte.useQuery(
     { id_visita: idVisita },
     { retry: false },
   );
@@ -780,6 +781,181 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
           {numReporte} · {fmtDate(visita.fecha_visita)}
         </div>
       </div>
+
+      <LoadingToast loading={isFetching} />
+    </div>
+  );
+}
+
+// ─── estado chip ─────────────────────────────────────────────────────────────
+
+const ESTADO_LABEL: Record<string, { label: string; color: string; dot: string }> = {
+  OPTIMA: { label: "Óptima", color: "text-[#1a9e5c]", dot: "bg-[#1a9e5c]" },
+  BUENAS_CONDICIONES: { label: "Buenas condiciones", color: "text-[#3d4f63]", dot: "bg-[#8494aa]" },
+  FUNCIONAL: { label: "Funcional", color: "text-[#d4860a]", dot: "bg-[#d4860a]" },
+  INOPERABLE: { label: "Inoperable", color: "text-[#d63b3b]", dot: "bg-[#d63b3b]" },
+};
+
+// ─── lista de reportes ────────────────────────────────────────────────────────
+
+function ReportesLista() {
+  const router = useRouter();
+  const [clienteId, setClienteId] = useState<number | null>(null);
+
+  const { data: clientes = [], isFetching: fetchingClientes } = api.clientes.list.useQuery();
+  const { data: visitas = [], isLoading, isFetching: fetchingVisitas } = api.visitas.listRecientes.useQuery(
+    { limit: 100, id_cliente: clienteId ?? undefined },
+  );
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
+        <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
+          <Link
+            href="/home"
+            className="font-(family-name:--font-barlow-condensed) text-base font-black tracking-wider text-[#0f2137]"
+          >
+            DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
+          </Link>
+          <span className="font-(family-name:--font-barlow-condensed) text-sm font-semibold tracking-wide text-[#8494aa] uppercase">
+            Reportes de Visita
+          </span>
+          <div className="flex-1" />
+          <Link
+            href="/formulario-visita"
+            className="rounded-md bg-[#1a5fa8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#134a87]"
+          >
+            + Nueva Visita
+          </Link>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-5xl px-6 py-8">
+        {/* Filtro */}
+        <div className="mb-6 flex items-center gap-3">
+          <label className="text-[11px] font-semibold tracking-wider text-[#8494aa] uppercase">
+            Cliente
+          </label>
+          <select
+            value={clienteId ?? ""}
+            onChange={(e) =>
+              setClienteId(e.target.value ? parseInt(e.target.value) : null)
+            }
+            className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] text-[#0f2137] outline-none focus:border-[#1a5fa8] focus:bg-white"
+          >
+            <option value="">Todos los clientes</option>
+            {clientes.map((c) => (
+              <option key={c.id_cliente} value={c.id_cliente}>
+                {c.nombre}
+              </option>
+            ))}
+          </select>
+          {clienteId && (
+            <button
+              onClick={() => setClienteId(null)}
+              className="text-xs text-[#8494aa] underline hover:text-[#d63b3b]"
+            >
+              Limpiar
+            </button>
+          )}
+          <span className="ml-auto text-xs text-[#b0bacb]">
+            {visitas.length} reporte{visitas.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+
+        {/* Lista */}
+        {isLoading ? (
+          <div className="py-20 text-center text-sm text-[#8494aa]">
+            Cargando reportes…
+          </div>
+        ) : visitas.length === 0 ? (
+          <div className="py-20 text-center text-sm text-[#8494aa]">
+            No hay reportes registrados.
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-lg border border-[#dde3ec] bg-white">
+            {/* Header tabla */}
+            <div className="grid grid-cols-[auto_2fr_2fr_1fr_1fr_auto] items-center gap-4 border-b border-[#dde3ec] bg-[#f4f6f9] px-5 py-2.5 text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">
+              <span className="w-4" />
+              <span>Máquina / Cliente</span>
+              <span>Fecha</span>
+              <span>Reporte #</span>
+              <span>Horómetro</span>
+              <span />
+            </div>
+
+            {visitas.map((v) => {
+              const maquina = v.maquinas_maestra;
+              const cliente = maquina?.clientes;
+              const numReporte =
+                maquina?.maquina_por_cliente && v.consecutivo_reporte
+                  ? `${v.numero_maquina_inf ?? maquina.maquina_por_cliente}-${String(v.consecutivo_reporte).padStart(4, "0")}`
+                  : `V-${String(v.id_visita).padStart(4, "0")}`;
+              const estadoInfo =
+                ESTADO_LABEL[v.evaluacion_estado ?? "BUENAS_CONDICIONES"] ??
+                ESTADO_LABEL.BUENAS_CONDICIONES!;
+
+              return (
+                <button
+                  key={v.id_visita}
+                  onClick={() =>
+                    router.push(`/reporte-visita?id=${v.id_visita}`)
+                  }
+                  className="grid w-full grid-cols-[auto_2fr_2fr_1fr_1fr_auto] items-center gap-4 border-b border-[#dde3ec] px-5 py-3.5 text-left transition-colors last:border-0 hover:bg-[#f9fafb]"
+                >
+                  {/* Estado dot */}
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full ${estadoInfo.dot}`}
+                  />
+
+                  {/* Máquina / Cliente */}
+                  <div>
+                    <div className="font-(family-name:--font-barlow-condensed) text-[14px] font-bold text-[#0f2137]">
+                      {maquina?.maquina_por_cliente ??
+                        maquina?.tipo_maquina ??
+                        "—"}
+                    </div>
+                    <div className="text-[11px] text-[#8494aa]">
+                      {cliente?.nombre ?? "—"}
+                    </div>
+                  </div>
+
+                  {/* Fecha */}
+                  <div>
+                    <div className="text-[13px] text-[#3d4f63]">
+                      {fmtDate(v.fecha_visita)}
+                    </div>
+                    <div className={`mt-0.5 text-[10px] font-semibold ${estadoInfo.color}`}>
+                      {estadoInfo.label}
+                    </div>
+                  </div>
+
+                  {/* Reporte # */}
+                  <div className="font-(family-name:--font-jetbrains) text-[12px] font-semibold text-[#1a5fa8]">
+                    {numReporte}
+                  </div>
+
+                  {/* Horómetro */}
+                  <div className="font-(family-name:--font-jetbrains) text-[12px] text-[#3d4f63]">
+                    {fmtNum(v.horometro_lectura)} hr
+                  </div>
+
+                  {/* CTA */}
+                  <div className="flex items-center gap-1 text-[11px] font-semibold text-[#1a5fa8]">
+                    Ver
+                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <LoadingToast loading={fetchingClientes || fetchingVisitas} />
     </div>
   );
 }
@@ -792,15 +968,7 @@ function ReportePage() {
   const idVisita = idRaw ? parseInt(idRaw, 10) : null;
 
   if (!idVisita || isNaN(idVisita)) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-[#8494aa]">
-        <div className="text-lg font-semibold">Selecciona un reporte</div>
-        <p className="text-sm">Usa la URL: /reporte-visita?id=1</p>
-        <Link href="/home" className="text-sm text-[#1a5fa8] underline">
-          Volver al inicio
-        </Link>
-      </div>
-    );
+    return <ReportesLista />;
   }
 
   return <ReporteContent idVisita={idVisita} />;
