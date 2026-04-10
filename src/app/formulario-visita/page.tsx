@@ -141,6 +141,7 @@ export default function FormularioVisitaPage() {
   const [compraRows, setCompraRows] = useState<CompraRow[]>([]);
   const [activeMachine, setActiveMachine] = useState(0);
   const [machineData, setMachineData] = useState<MachineData[]>([]);
+  const [editingKghrSet, setEditingKghrSet] = useState<Set<number>>(new Set());
   const initializedClientRef = useRef<number | null>(null);
 
   // ── Queries ──────────────────────────────────────────────────────────────
@@ -329,6 +330,25 @@ export default function FormularioVisitaPage() {
     return result;
   }, [machineData, maquinasChecked, bodegaRows, compraRows, stockAnterior, maquinasDB]);
 
+  const toggleKghrEdit = (idx: number) => {
+    setEditingKghrSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) {
+        next.delete(idx);
+      } else {
+        next.add(idx);
+        const md = machineData[idx];
+        const calc = md ? kghrCalculados[md.id_maquina] : null;
+        if (md && !md.kghr && calc !== null && calc !== undefined) {
+          setMachineData((p) =>
+            p.map((x, j) => (j === idx ? { ...x, kghr: calc.toFixed(2) } : x)),
+          );
+        }
+      }
+      return next;
+    });
+  };
+
   const goToStep = (n: number) => { if (n >= 1 && n <= 4) setStep(n); };
 
   // ── Save ─────────────────────────────────────────────────────────────────
@@ -407,7 +427,7 @@ export default function FormularioVisitaPage() {
     <div className="min-h-screen pb-24">
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
+      <header className="sticky top-0 z-50 border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
         <div className="mx-auto flex max-w-240 items-center gap-4 px-6 py-3">
           <Link
             href="/home"
@@ -562,13 +582,16 @@ export default function FormularioVisitaPage() {
             {/* Stock Bodega */}
             <div className="mb-4 rounded-md border border-[#dde3ec] bg-white p-5">
               <SectionLabel>Stock Bodega Actual</SectionLabel>
-              <div className="mb-1 grid grid-cols-[2fr_1fr_auto] gap-2 border-b-2 border-[#dde3ec] pb-2">
+              <div className="mb-1 grid grid-cols-[2fr_1fr_1fr_auto] gap-2 border-b-2 border-[#dde3ec] pb-2">
                 <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Tipo de Granalla</span>
                 <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Kg Bodega</span>
+                <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Ref. Anterior</span>
                 <span className="w-8" />
               </div>
-              {bodegaRows.map((row, i) => (
-                <div key={i} className="grid grid-cols-[2fr_1fr_auto] items-center gap-2 py-2">
+              {bodegaRows.map((row, i) => {
+                const refAnt = stockAnterior?.bodegaAnterior?.find((b) => b.id_granalla === row.id_granalla);
+                return (
+                <div key={i} className="grid grid-cols-[2fr_1fr_1fr_auto] items-center gap-2 py-2">
                   <select
                     value={row.id_granalla ?? ""}
                     onChange={(e) => {
@@ -592,12 +615,16 @@ export default function FormularioVisitaPage() {
                     onChange={(e) => setBodegaRows((prev) => prev.map((r, j) => j === i ? { ...r, kg: e.target.value } : r))}
                     className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[13px] outline-none focus:border-[#1a5fa8]"
                   />
+                  <span className="font-(family-name:--font-jetbrains) text-[12px] text-[#8494aa]">
+                    {refAnt ? `${Number(refAnt.kg_bodega).toLocaleString("es-MX")} kg` : "—"}
+                  </span>
                   <button
                     onClick={() => setBodegaRows((prev) => prev.filter((_, j) => j !== i))}
                     className="flex h-8 w-8 items-center justify-center rounded border border-[#dde3ec] text-[#d63b3b] hover:border-[#d63b3b] hover:bg-[#fdf0f0]"
                   >×</button>
                 </div>
-              ))}
+                );
+              })}
               <button
                 onClick={() => setBodegaRows((prev) => [...prev, { id_granalla: null, nombre: "", kg: "" }])}
                 className="mt-2 rounded-md border border-dashed border-[#1a5fa8] px-4 py-2 text-xs font-semibold text-[#1a5fa8] hover:bg-[rgba(26,95,168,0.06)]"
@@ -765,11 +792,17 @@ export default function FormularioVisitaPage() {
                     const pct = granTotal > 0 ? ((val / granTotal) * 100).toFixed(1) : "0";
                     const barW = (val / granMax) * 100;
                     return (
-                      <div key={mesh} className="flex items-center gap-2 py-1">
-                        <span className={`w-10 text-right font-(family-name:--font-jetbrains) text-[11px] font-semibold ${mesh === "POLVO" ? "text-[#8494aa]" : "text-[#0f2137]"}`}>
+                      <div key={mesh} className="grid grid-cols-[70px_1fr_56px] items-center gap-2 border-b border-[#dde3ec] py-1.5 last:border-0">
+                        <span className={`font-(family-name:--font-jetbrains) text-[12px] font-semibold ${mesh === "POLVO" ? "text-[#8494aa]" : "text-[#1a5fa8]"}`}>
                           {mesh}
                         </span>
-                        <div className="flex flex-1 items-center gap-2">
+                        <div className="relative h-7">
+                          <div className="absolute inset-0 overflow-hidden rounded border border-[#dde3ec] bg-[#f4f6f9]">
+                            <div
+                              className={`h-full transition-[width] ${mesh === "POLVO" ? "bg-[rgba(180,100,0,0.2)]" : "bg-[rgba(26,95,168,0.15)]"}`}
+                              style={{ width: `${barW}%` }}
+                            />
+                          </div>
                           <input
                             type="number"
                             min="0"
@@ -777,16 +810,10 @@ export default function FormularioVisitaPage() {
                             placeholder="0"
                             value={val || ""}
                             onChange={(e) => updateGranValue(idx, parseFloat(e.target.value) || 0)}
-                            className="w-16 rounded border border-[#dde3ec] bg-[#f4f6f9] px-2 py-1 font-(family-name:--font-jetbrains) text-xs outline-none focus:border-[#1a5fa8]"
+                            className="absolute inset-0 w-full bg-transparent px-2 text-center font-(family-name:--font-jetbrains) text-[13px] font-semibold text-[#0f2137] outline-none"
                           />
-                          <div className="h-3 flex-1 rounded-full bg-[#f4f6f9]">
-                            <div
-                              className={`h-full rounded-full transition-all ${mesh === "POLVO" ? "bg-[rgba(180,100,0,0.2)]" : "bg-[rgba(26,95,168,0.2)]"}`}
-                              style={{ width: `${barW}%` }}
-                            />
-                          </div>
                         </div>
-                        <span className="w-12 text-right font-(family-name:--font-jetbrains) text-[10px] text-[#8494aa]">{pct}%</span>
+                        <span className="text-right font-(family-name:--font-jetbrains) text-[13px] font-semibold text-[#8494aa]">{pct}%</span>
                       </div>
                     );
                   })}
@@ -924,22 +951,32 @@ export default function FormularioVisitaPage() {
           <div>
             <div className="mb-5">
               <h2 className="font-(family-name:--font-barlow-condensed) text-[22px] font-bold text-[#0f2137]">Resumen y Cierre</h2>
-              <p className="mt-1 text-xs text-[#8494aa]">Captura el KG/HR y guarda la visita.</p>
+              <p className="mt-1 text-xs text-[#8494aa]">Revisa los kg/hr calculados — puedes ajustarlos manualmente antes de guardar. Los ajustes quedan marcados.</p>
             </div>
 
             {/* Stock resumen */}
             {bodegaRows.some((r) => r.kg) && (
               <div className="mb-4 rounded-md border border-[#dde3ec] bg-white p-4">
-                <SectionLabel>Stock Bodega Capturado</SectionLabel>
+                <SectionLabel>Stock Nuevo por Tipo de Granalla</SectionLabel>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5">
-                  {bodegaRows.filter((r) => r.kg).map((row, i) => (
-                    <div key={i} className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3.5 py-2.5">
-                      <div className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">{row.nombre || "—"}</div>
-                      <div className="mt-1 font-(family-name:--font-jetbrains) text-xl font-bold text-[#0f2137]">
-                        {row.kg} <span className="text-[11px] font-normal text-[#8494aa]">kg</span>
+                  {bodegaRows.filter((r) => r.kg).map((row, i) => {
+                    const bodegaKg = parseFloat(row.kg) || 0;
+                    const pisoTotal = machineData
+                      .filter((_, mi) => maquinasChecked[mi])
+                      .reduce((s, m) => s + (parseFloat(m.kgPiso) || 0), 0);
+                    const total = bodegaKg + pisoTotal;
+                    return (
+                      <div key={i} className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3.5 py-2.5">
+                        <div className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">{row.nombre || "—"}</div>
+                        <div className="mt-1 font-(family-name:--font-jetbrains) text-xl font-bold text-[#0f2137]">
+                          {total.toLocaleString("es-MX")} <span className="text-[11px] font-normal text-[#8494aa]">kg</span>
+                        </div>
+                        <div className="mt-0.5 text-[10px] text-[#8494aa]">
+                          Bodega {bodegaKg.toLocaleString("es-MX")}{pisoTotal > 0 ? ` + Piso ${pisoTotal.toLocaleString("es-MX")}` : ""}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -956,9 +993,11 @@ export default function FormularioVisitaPage() {
                   calculado !== null && calculado !== undefined
                     ? calculado.toFixed(2)
                     : null;
+                const isEditing = editingKghrSet.has(i);
+                const displayVal = md.kghr || calculadoStr;
                 return (
                   <div key={m.id_maquina} className="overflow-hidden rounded-md border border-[#dde3ec]">
-                    <div className="bg-[#0f2137] px-5 py-3">
+                    <div className="flex items-center justify-between bg-[#1a5fa8] px-5 py-3">
                       <div className="font-(family-name:--font-barlow-condensed) text-sm font-bold text-white">
                         {m.numero_inplant} — {clienteData?.nombre}
                       </div>
@@ -972,51 +1011,59 @@ export default function FormularioVisitaPage() {
                         <span className="text-[#8494aa]">Estado</span>
                         <span className="text-[#0f2137]">{md.estado.replace(/_/g, " ")}</span>
                       </div>
-                      {calculadoStr && !md.kghrAjustado && (
-                        <div className="flex justify-between border-b border-[#dde3ec] py-2 text-xs">
-                          <span className="text-[#8494aa]">KG/HR calculado</span>
-                          <span className="font-(family-name:--font-jetbrains) font-semibold text-[#1a9e5c]">{calculadoStr}</span>
-                        </div>
-                      )}
                       <div className="flex items-center justify-between pt-3">
+                        <span className="text-xs font-semibold text-[#3d4f63]">KG / HR</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-[#3d4f63]">KG / HR</span>
-                          {md.kghrAjustado && (
-                            <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[9px] font-bold tracking-wider text-[#d4860a] uppercase">
-                              Ajustado
-                            </span>
+                          {!isEditing ? (
+                            <>
+                              <span className="font-(family-name:--font-jetbrains) text-[22px] font-bold text-[#1a5fa8]">
+                                {displayVal ?? "—"}
+                              </span>
+                              {md.kghrAjustado && (
+                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[9px] font-bold tracking-wider text-[#d4860a] uppercase">
+                                  Ajustado
+                                </span>
+                              )}
+                              <button
+                                onClick={() => toggleKghrEdit(i)}
+                                className="text-[10px] text-[#8494aa] underline hover:text-[#1a5fa8]"
+                              >
+                                editar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <input
+                                type="number"
+                                step="0.01"
+                                autoFocus
+                                placeholder={calculadoStr ?? "—"}
+                                value={md.kghr}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const isManual = calculadoStr ? val !== calculadoStr : val !== "";
+                                  setMachineData((prev) =>
+                                    prev.map((x, j) =>
+                                      j === i ? { ...x, kghr: val, kghrAjustado: isManual } : x,
+                                    ),
+                                  );
+                                }}
+                                className="w-24 rounded border border-[#1a5fa8] px-2 py-1 text-center font-(family-name:--font-jetbrains) text-sm font-bold text-[#1a5fa8] outline-none"
+                              />
+                              {md.kghrAjustado && (
+                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[9px] font-bold tracking-wider text-[#d4860a] uppercase">
+                                  Ajustado
+                                </span>
+                              )}
+                              <button
+                                onClick={() => toggleKghrEdit(i)}
+                                className="text-[10px] text-[#8494aa] underline hover:text-[#1a5fa8]"
+                              >
+                                listo
+                              </button>
+                            </>
                           )}
                         </div>
-                        <input
-                          type="number"
-                          step="0.01"
-                          placeholder={calculadoStr ?? "—"}
-                          value={md.kghr}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const isManual = calculadoStr
-                              ? val !== calculadoStr
-                              : val !== "";
-                            setMachineData((prev) =>
-                              prev.map((x, j) =>
-                                j === i
-                                  ? { ...x, kghr: val, kghrAjustado: isManual }
-                                  : x,
-                              ),
-                            );
-                          }}
-                          onFocus={() => {
-                            // Pre-fill with calculated value on first focus if empty
-                            if (!md.kghr && calculadoStr) {
-                              setMachineData((prev) =>
-                                prev.map((x, j) =>
-                                  j === i ? { ...x, kghr: calculadoStr } : x,
-                                ),
-                              );
-                            }
-                          }}
-                          className="w-24 rounded border border-[#1a5fa8] px-2 py-1 text-center font-(family-name:--font-jetbrains) text-sm font-bold text-[#1a5fa8] outline-none"
-                        />
                       </div>
                     </div>
                   </div>

@@ -320,7 +320,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
       </header>
 
       {/* Main Content */}
-      <div className="mx-auto grid max-w-3005 p-6">
+      <div className="mx-auto grid max-w-300 gap-6 p-6">
         {/* 01 — Estado General */}
         <div>
           <SectionLabel>01 — Estado General</SectionLabel>
@@ -798,14 +798,45 @@ const ESTADO_LABEL: Record<string, { label: string; color: string; dot: string }
 
 // ─── lista de reportes ────────────────────────────────────────────────────────
 
+type SortField = "fecha" | "numero";
+type SortDir = "asc" | "desc";
+
 function ReportesLista() {
   const router = useRouter();
   const [clienteId, setClienteId] = useState<number | null>(null);
+  const [sortField, setSortField] = useState<SortField>("fecha");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const { data: clientes = [], isFetching: fetchingClientes } = api.clientes.list.useQuery();
   const { data: visitas = [], isLoading, isFetching: fetchingVisitas } = api.visitas.listRecientes.useQuery(
     { limit: 100, id_cliente: clienteId ?? undefined },
   );
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir("desc");
+    }
+  };
+
+  const sortedVisitas = [...visitas].sort((a, b) => {
+    let cmp = 0;
+    if (sortField === "fecha") {
+      cmp = new Date(a.fecha_visita ?? 0).getTime() - new Date(b.fecha_visita ?? 0).getTime();
+    } else {
+      cmp = (a.consecutivo_reporte ?? 0) - (b.consecutivo_reporte ?? 0);
+    }
+    return sortDir === "asc" ? cmp : -cmp;
+  });
+
+  const SortIcon = ({ field }: { field: SortField }) =>
+    sortField !== field ? (
+      <span className="text-[#dde3ec]">↕</span>
+    ) : (
+      <span className="text-[#1a5fa8]">{sortDir === "asc" ? "↑" : "↓"}</span>
+    );
 
   return (
     <div className="min-h-screen">
@@ -860,7 +891,7 @@ function ReportesLista() {
             </button>
           )}
           <span className="ml-auto text-xs text-[#b0bacb]">
-            {visitas.length} reporte{visitas.length !== 1 ? "s" : ""}
+            {sortedVisitas.length} reporte{sortedVisitas.length !== 1 ? "s" : ""}
           </span>
         </div>
 
@@ -869,7 +900,7 @@ function ReportesLista() {
           <div className="py-20 text-center text-sm text-[#8494aa]">
             Cargando reportes…
           </div>
-        ) : visitas.length === 0 ? (
+        ) : sortedVisitas.length === 0 ? (
           <div className="py-20 text-center text-sm text-[#8494aa]">
             No hay reportes registrados.
           </div>
@@ -879,13 +910,23 @@ function ReportesLista() {
             <div className="grid grid-cols-[auto_2fr_2fr_1fr_1fr_auto] items-center gap-4 border-b border-[#dde3ec] bg-[#f4f6f9] px-5 py-2.5 text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">
               <span className="w-4" />
               <span>Máquina / Cliente</span>
-              <span>Fecha</span>
-              <span>Reporte #</span>
+              <button
+                onClick={() => toggleSort("fecha")}
+                className="flex items-center gap-1 hover:text-[#1a5fa8] transition-colors"
+              >
+                Fecha <SortIcon field="fecha" />
+              </button>
+              <button
+                onClick={() => toggleSort("numero")}
+                className="flex items-center gap-1 hover:text-[#1a5fa8] transition-colors"
+              >
+                Reporte # <SortIcon field="numero" />
+              </button>
               <span>Horómetro</span>
               <span />
             </div>
 
-            {visitas.map((v) => {
+            {sortedVisitas.map((v) => {
               const maquina = v.maquinas_maestra;
               const cliente = maquina?.clientes;
               const numReporte =
