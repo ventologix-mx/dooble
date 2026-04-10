@@ -99,7 +99,7 @@ function defaultMachineData(m: MaquinaDB): MachineData {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-3 flex items-center gap-2.5 font-(family-name:--font-barlow-condensed) text-[11px] font-extrabold tracking-[0.2em] text-[#1a5fa8] uppercase">
+    <div className="mb-3 flex items-center gap-2.5 font-(family-name:--font-barlow-condensed) text-[13px] font-extrabold tracking-[0.2em] text-[#1a5fa8] uppercase">
       {children}
       <div className="h-px flex-1 bg-[#dde3ec]" />
     </div>
@@ -114,7 +114,7 @@ function FieldMono({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[11px] font-semibold tracking-wider text-[#8494aa] uppercase">
+      <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">
         {label}
       </label>
       <input
@@ -122,9 +122,9 @@ function FieldMono({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[13px] text-[#0f2137] outline-none transition-colors focus:border-[#1a5fa8] focus:bg-white"
+        className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[15px] text-[#0f2137] outline-none transition-colors focus:border-[#1a5fa8] focus:bg-white"
       />
-      {hint && <span className="text-[10px] text-[#b0bacb]">{hint}</span>}
+      {hint && <span className="text-[12px] text-[#6b7c8b]">{hint}</span>}
     </div>
   );
 }
@@ -435,11 +435,11 @@ export default function FormularioVisitaPage() {
           >
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
           </Link>
-          <span className="font-(family-name:--font-barlow-condensed) text-sm font-semibold tracking-wide text-[#8494aa] uppercase">
+          <span className="font-(family-name:--font-barlow-condensed) text-sm font-semibold tracking-wide text-[#566778] uppercase">
             Nueva Visita Técnica
           </span>
           <div className="flex-1" />
-          <span className="font-(family-name:--font-jetbrains) text-xs text-[#8494aa]">
+          <span className="font-(family-name:--font-jetbrains) text-xs text-[#566778]">
             Paso <span className="font-semibold text-[#1a5fa8]">{step}</span> de 4
           </span>
         </div>
@@ -466,10 +466,10 @@ export default function FormularioVisitaPage() {
               {i < 3 && (
                 <div className="absolute top-3.5 left-1/2 right-[-50%] h-0.5 bg-[#dde3ec]" />
               )}
-              <div className={`relative z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 font-(family-name:--font-jetbrains) text-[11px] font-semibold transition-all ${isActive ? "border-[#1a5fa8] bg-[#1a5fa8] text-white" : isDone ? "border-[#1a9e5c] bg-[#1a9e5c] text-white" : "border-[#dde3ec] bg-white text-[#b0bacb]"}`}>
+              <div className={`relative z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 font-(family-name:--font-jetbrains) text-[13px] font-semibold transition-all ${isActive ? "border-[#1a5fa8] bg-[#1a5fa8] text-white" : isDone ? "border-[#1a9e5c] bg-[#1a9e5c] text-white" : "border-[#dde3ec] bg-white text-[#6b7c8b]"}`}>
                 {isDone ? "✓" : n}
               </div>
-              <span className={`text-[10px] font-semibold tracking-wider uppercase ${isActive ? "text-[#1a5fa8]" : isDone ? "text-[#1a9e5c]" : "text-[#b0bacb]"}`}>
+              <span className={`text-[12px] font-semibold tracking-wider uppercase ${isActive ? "text-[#1a5fa8]" : isDone ? "text-[#1a9e5c]" : "text-[#6b7c8b]"}`}>
                 {label}
               </span>
             </button>
@@ -485,17 +485,17 @@ export default function FormularioVisitaPage() {
           <div>
             <div className="mb-5">
               <h2 className="font-(family-name:--font-barlow-condensed) text-[22px] font-bold text-[#0f2137]">Cliente y Fecha</h2>
-              <p className="mt-1 text-xs text-[#8494aa]">Selecciona el cliente y la fecha de la visita.</p>
+              <p className="mt-1 text-xs text-[#566778]">Selecciona el cliente y la fecha de la visita.</p>
             </div>
 
             <div className="mb-4 rounded-md border border-[#dde3ec] bg-white p-5">
               <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold tracking-wider text-[#8494aa] uppercase">Cliente</label>
+                  <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">Cliente</label>
                   <select
                     value={clienteId ?? ""}
                     onChange={(e) => handleClienteChange(e.target.value)}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] text-[#0f2137] outline-none focus:border-[#1a5fa8] focus:bg-white"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] text-[#0f2137] outline-none focus:border-[#1a5fa8] focus:bg-white"
                   >
                     <option value="">— Seleccionar cliente —</option>
                     {clientes.map((c) => (
@@ -506,21 +506,21 @@ export default function FormularioVisitaPage() {
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold tracking-wider text-[#8494aa] uppercase">Fecha de Visita</label>
+                  <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">Fecha de Visita</label>
                   <input
                     type="date"
                     value={fecha}
                     onChange={(e) => setFecha(e.target.value)}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] text-[#0f2137] outline-none focus:border-[#1a5fa8] focus:bg-white"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] text-[#0f2137] outline-none focus:border-[#1a5fa8] focus:bg-white"
                   />
-                  <span className="text-[10px] text-[#b0bacb]">Puedes ajustar si estás llenando en oficina</span>
+                  <span className="text-[12px] text-[#6b7c8b]">Puedes ajustar si estás llenando en oficina</span>
                 </div>
               </div>
 
               {clienteData && (
                 <div className="mt-4 rounded border border-[#dde3ec] bg-[#f4f6f9] p-4">
                   <div className="font-(family-name:--font-barlow-condensed) text-lg font-bold text-[#0f2137]">{clienteData.nombre}</div>
-                  <div className="mt-2 flex flex-wrap gap-4 text-xs text-[#8494aa]">
+                  <div className="mt-2 flex flex-wrap gap-4 text-xs text-[#566778]">
                     <span>{clienteData.num_maquinas} máquinas activas</span>
                     {clienteData.ultima_visita && (
                       <span>
@@ -539,9 +539,9 @@ export default function FormularioVisitaPage() {
               <div className="rounded-md border border-[#dde3ec] bg-white p-4">
                 <SectionLabel>Máquinas a visitar</SectionLabel>
                 {loadingMaquinas ? (
-                  <p className="text-xs text-[#8494aa]">Cargando máquinas…</p>
+                  <p className="text-xs text-[#566778]">Cargando máquinas…</p>
                 ) : maquinasDB.length === 0 ? (
-                  <p className="text-xs text-[#8494aa]">Sin máquinas registradas.</p>
+                  <p className="text-xs text-[#566778]">Sin máquinas registradas.</p>
                 ) : (
                   maquinasDB.map((m, i) => (
                     <div key={m.id_maquina} className="flex items-center gap-2.5 border-b border-[#dde3ec] py-2 last:border-0">
@@ -552,11 +552,11 @@ export default function FormularioVisitaPage() {
                         className="h-4 w-4 accent-[#1a5fa8]"
                       />
                       <div>
-                        <span className="font-(family-name:--font-barlow-condensed) text-[13px] font-semibold text-[#0f2137]">
+                        <span className="font-(family-name:--font-barlow-condensed) text-[15px] font-semibold text-[#0f2137]">
                           {m.numero_inplant} — {m.maquina_por_cliente ?? m.tipo_maquina}
                         </span>
                         {m.ultima_visita_fecha && (
-                          <span className="ml-3 font-(family-name:--font-jetbrains) text-[10px] text-[#8494aa]">
+                          <span className="ml-3 font-(family-name:--font-jetbrains) text-[12px] text-[#566778]">
                             última visita: {new Date(m.ultima_visita_fecha).toLocaleDateString("es-MX", { day: "2-digit", month: "short" })}
                             {m.ultima_visita_horometro ? ` · ${m.ultima_visita_horometro.toLocaleString()} hr` : ""}
                           </span>
@@ -565,7 +565,7 @@ export default function FormularioVisitaPage() {
                     </div>
                   ))
                 )}
-                <span className="mt-2 block text-[10px] text-[#b0bacb]">Desmarca las máquinas que no visitarás hoy.</span>
+                <span className="mt-2 block text-[12px] text-[#6b7c8b]">Desmarca las máquinas que no visitarás hoy.</span>
               </div>
             )}
           </div>
@@ -576,16 +576,16 @@ export default function FormularioVisitaPage() {
           <div>
             <div className="mb-5">
               <h2 className="font-(family-name:--font-barlow-condensed) text-[22px] font-bold text-[#0f2137]">Stock y Compras del Periodo</h2>
-              <p className="mt-1 text-xs text-[#8494aa]">Stock actual en bodega y compras desde la última visita.</p>
+              <p className="mt-1 text-xs text-[#566778]">Stock actual en bodega y compras desde la última visita.</p>
             </div>
 
             {/* Stock Bodega */}
             <div className="mb-4 rounded-md border border-[#dde3ec] bg-white p-5">
               <SectionLabel>Stock Bodega Actual</SectionLabel>
               <div className="mb-1 grid grid-cols-[2fr_1fr_1fr_auto] gap-2 border-b-2 border-[#dde3ec] pb-2">
-                <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Tipo de Granalla</span>
-                <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Kg Bodega</span>
-                <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Ref. Anterior</span>
+                <span className="text-[12px] font-bold tracking-wider text-[#566778] uppercase">Tipo de Granalla</span>
+                <span className="text-[12px] font-bold tracking-wider text-[#566778] uppercase">Kg Bodega</span>
+                <span className="text-[12px] font-bold tracking-wider text-[#566778] uppercase">Ref. Anterior</span>
                 <span className="w-8" />
               </div>
               {bodegaRows.map((row, i) => {
@@ -599,7 +599,7 @@ export default function FormularioVisitaPage() {
                       const gran = granallasDB.find((g) => g.id_granalla === id);
                       setBodegaRows((prev) => prev.map((r, j) => j === i ? { ...r, id_granalla: id || null, nombre: gran?.nominacion_comercial ?? gran?.codigo_dooble ?? "" } : r));
                     }}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] outline-none focus:border-[#1a5fa8]"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8]"
                   >
                     <option value="">— Seleccionar —</option>
                     {granallasDB.map((g) => (
@@ -613,9 +613,9 @@ export default function FormularioVisitaPage() {
                     placeholder="0"
                     value={row.kg}
                     onChange={(e) => setBodegaRows((prev) => prev.map((r, j) => j === i ? { ...r, kg: e.target.value } : r))}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[13px] outline-none focus:border-[#1a5fa8]"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[15px] outline-none focus:border-[#1a5fa8]"
                   />
-                  <span className="font-(family-name:--font-jetbrains) text-[12px] text-[#8494aa]">
+                  <span className="font-(family-name:--font-jetbrains) text-[14px] text-[#566778]">
                     {refAnt ? `${Number(refAnt.kg_bodega).toLocaleString("es-MX")} kg` : "—"}
                   </span>
                   <button
@@ -637,10 +637,10 @@ export default function FormularioVisitaPage() {
             <div className="rounded-md border border-[#dde3ec] bg-white p-5">
               <SectionLabel>Compras del Periodo</SectionLabel>
               <div className="mb-1 grid grid-cols-[110px_2fr_1fr_1fr_auto] gap-2 border-b-2 border-[#dde3ec] pb-2">
-                <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Proveedor</span>
-                <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Granalla</span>
-                <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Kg</span>
-                <span className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">OV / Ref</span>
+                <span className="text-[12px] font-bold tracking-wider text-[#566778] uppercase">Proveedor</span>
+                <span className="text-[12px] font-bold tracking-wider text-[#566778] uppercase">Granalla</span>
+                <span className="text-[12px] font-bold tracking-wider text-[#566778] uppercase">Kg</span>
+                <span className="text-[12px] font-bold tracking-wider text-[#566778] uppercase">OV / Ref</span>
                 <span className="w-8" />
               </div>
               {compraRows.map((row, i) => (
@@ -648,7 +648,7 @@ export default function FormularioVisitaPage() {
                   <select
                     value={row.proveedor}
                     onChange={(e) => setCompraRows((prev) => prev.map((r, j) => j === i ? { ...r, proveedor: e.target.value as visitas_compras_proveedor } : r))}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-2 py-2 text-[13px] outline-none focus:border-[#1a5fa8]"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-2 py-2 text-[15px] outline-none focus:border-[#1a5fa8]"
                   >
                     <option value={visitas_compras_proveedor.DOOBLE}>DOOBLE</option>
                     <option value={visitas_compras_proveedor.COMPETENCIA}>Competencia</option>
@@ -661,7 +661,7 @@ export default function FormularioVisitaPage() {
                         const gran = granallasDB.find((g) => g.id_granalla === id);
                         setCompraRows((prev) => prev.map((r, j) => j === i ? { ...r, id_granalla: id || null, granallaNombre: gran?.nominacion_comercial ?? "" } : r));
                       }}
-                      className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] outline-none focus:border-[#1a5fa8]"
+                      className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8]"
                     >
                       <option value="">— Seleccionar —</option>
                       {granallasDB.map((g) => (
@@ -676,7 +676,7 @@ export default function FormularioVisitaPage() {
                       placeholder="Nombre granalla competencia"
                       value={row.granallComp}
                       onChange={(e) => setCompraRows((prev) => prev.map((r, j) => j === i ? { ...r, granallComp: e.target.value } : r))}
-                      className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] outline-none focus:border-[#1a5fa8]"
+                      className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8]"
                     />
                   )}
                   <input
@@ -684,14 +684,14 @@ export default function FormularioVisitaPage() {
                     placeholder="0 kg"
                     value={row.kg}
                     onChange={(e) => setCompraRows((prev) => prev.map((r, j) => j === i ? { ...r, kg: e.target.value } : r))}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[13px] outline-none focus:border-[#1a5fa8]"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[15px] outline-none focus:border-[#1a5fa8]"
                   />
                   <input
                     type="text"
                     placeholder="OV-2025-441"
                     value={row.ov}
                     onChange={(e) => setCompraRows((prev) => prev.map((r, j) => j === i ? { ...r, ov: e.target.value } : r))}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[13px] outline-none focus:border-[#1a5fa8]"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[15px] outline-none focus:border-[#1a5fa8]"
                   />
                   <button
                     onClick={() => setCompraRows((prev) => prev.filter((_, j) => j !== i))}
@@ -714,7 +714,7 @@ export default function FormularioVisitaPage() {
           <div>
             <div className="mb-5">
               <h2 className="font-(family-name:--font-barlow-condensed) text-[22px] font-bold text-[#0f2137]">Datos por Máquina</h2>
-              <p className="mt-1 text-xs text-[#8494aa]">Completa los datos de cada máquina visitada.</p>
+              <p className="mt-1 text-xs text-[#566778]">Completa los datos de cada máquina visitada.</p>
             </div>
 
             {/* Tabs */}
@@ -725,7 +725,7 @@ export default function FormularioVisitaPage() {
                   <button
                     key={m.id_maquina}
                     onClick={() => setActiveMachine(i)}
-                    className={`flex items-center gap-2 border-b-2 px-5 py-3 text-[12px] font-semibold tracking-wide transition-colors ${activeMachine === i ? "border-[#1a5fa8] bg-white text-[#1a5fa8]" : "border-transparent bg-[#f4f6f9] text-[#8494aa] hover:text-[#3d4f63]"}`}
+                    className={`flex items-center gap-2 border-b-2 px-5 py-3 text-[14px] font-semibold tracking-wide transition-colors ${activeMachine === i ? "border-[#1a5fa8] bg-white text-[#1a5fa8]" : "border-transparent bg-[#f4f6f9] text-[#566778] hover:text-[#3d4f63]"}`}
                   >
                     <div className={`h-2 w-2 rounded-full ${activeMachine === i ? "bg-[#1a5fa8]" : "bg-[#dde3ec]"}`} />
                     {m.numero_inplant ?? `M${i + 1}`}
@@ -754,7 +754,7 @@ export default function FormularioVisitaPage() {
                     const mdb = maquinasDB[activeMachine];
                     return (
                       <div key={amp.num_turbina} className="flex flex-col items-center gap-1">
-                        <label className="text-[11px] font-bold text-[#1a5fa8]">T{amp.num_turbina}</label>
+                        <label className="text-[13px] font-bold text-[#1a5fa8]">T{amp.num_turbina}</label>
                         <input
                           type="number"
                           step="0.1"
@@ -764,7 +764,7 @@ export default function FormularioVisitaPage() {
                           className="w-20 rounded border-2 border-[#dde3ec] bg-[#f4f6f9] px-2 py-2 text-center font-(family-name:--font-jetbrains) text-lg font-semibold text-[#0f2137] outline-none focus:border-[#1a5fa8]"
                         />
                         {mdb?.amp_vacio !== null && (
-                          <span className="text-[9px] text-[#b0bacb]">vacío {mdb?.amp_vacio} A</span>
+                          <span className="text-[11px] text-[#6b7c8b]">vacío {mdb?.amp_vacio} A</span>
                         )}
                       </div>
                     );
@@ -772,7 +772,7 @@ export default function FormularioVisitaPage() {
                 </div>
                 {maquinasDB[activeMachine]?.amp_maximo && (
                   <div className="min-w-35">
-                    <div className="mb-1.5 text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">Referencia</div>
+                    <div className="mb-1.5 text-[12px] font-bold tracking-wider text-[#566778] uppercase">Referencia</div>
                     <div className="text-xs text-[#3d4f63]">Vacío: <strong className="font-(family-name:--font-jetbrains)">{maquinasDB[activeMachine]?.amp_vacio} A</strong></div>
                     <div className="text-xs text-[#3d4f63]">Máximo: <strong className="font-(family-name:--font-jetbrains)">{maquinasDB[activeMachine]?.amp_maximo} A</strong></div>
                   </div>
@@ -786,14 +786,14 @@ export default function FormularioVisitaPage() {
               <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 {/* Inputs por malla */}
                 <div>
-                  <div className="mb-2 text-[11px] font-bold tracking-wider text-[#8494aa] uppercase">Peso por Malla (gramos)</div>
+                  <div className="mb-2 text-[13px] font-bold tracking-wider text-[#566778] uppercase">Peso por Malla (gramos)</div>
                   {MESH_SIZES.map((mesh, idx) => {
                     const val = currentMachine.granValues[idx] ?? 0;
                     const pct = granTotal > 0 ? ((val / granTotal) * 100).toFixed(1) : "0";
                     const barW = (val / granMax) * 100;
                     return (
                       <div key={mesh} className="grid grid-cols-[70px_1fr_56px] items-center gap-2 border-b border-[#dde3ec] py-1.5 last:border-0">
-                        <span className={`font-(family-name:--font-jetbrains) text-[12px] font-semibold ${mesh === "POLVO" ? "text-[#8494aa]" : "text-[#1a5fa8]"}`}>
+                        <span className={`font-(family-name:--font-jetbrains) text-[14px] font-semibold ${mesh === "POLVO" ? "text-[#566778]" : "text-[#1a5fa8]"}`}>
                           {mesh}
                         </span>
                         <div className="relative h-7">
@@ -810,15 +810,15 @@ export default function FormularioVisitaPage() {
                             placeholder="0"
                             value={val || ""}
                             onChange={(e) => updateGranValue(idx, parseFloat(e.target.value) || 0)}
-                            className="absolute inset-0 w-full bg-transparent px-2 text-center font-(family-name:--font-jetbrains) text-[13px] font-semibold text-[#0f2137] outline-none"
+                            className="absolute inset-0 w-full bg-transparent px-2 text-center font-(family-name:--font-jetbrains) text-[15px] font-semibold text-[#0f2137] outline-none"
                           />
                         </div>
-                        <span className="text-right font-(family-name:--font-jetbrains) text-[13px] font-semibold text-[#8494aa]">{pct}%</span>
+                        <span className="text-right font-(family-name:--font-jetbrains) text-[15px] font-semibold text-[#566778]">{pct}%</span>
                       </div>
                     );
                   })}
                   <div className="mt-2 flex items-center justify-between border-t border-[#dde3ec] pt-2">
-                    <span className="text-[11px] font-bold tracking-wider text-[#8494aa] uppercase">Total</span>
+                    <span className="text-[13px] font-bold tracking-wider text-[#566778] uppercase">Total</span>
                     <span className={`font-(family-name:--font-jetbrains) text-sm font-bold ${granTotal === 0 ? "text-[#d4860a]" : granTotal >= 190 && granTotal <= 210 ? "text-[#1a9e5c]" : granTotal >= 150 && granTotal <= 250 ? "text-[#d4860a]" : "text-[#d63b3b]"}`}>
                       {granTotal} g
                     </span>
@@ -827,7 +827,7 @@ export default function FormularioVisitaPage() {
 
                 {/* Performance + Granalla instalada */}
                 <div>
-                  <div className="mb-2 text-[11px] font-bold tracking-wider text-[#8494aa] uppercase">Performance de Grano</div>
+                  <div className="mb-2 text-[13px] font-bold tracking-wider text-[#566778] uppercase">Performance de Grano</div>
                   <div className="mb-4 rounded border border-[#dde3ec] bg-[#f4f6f9] p-4">
                     <div className="grid gap-2.5">
                       <FieldMono label="% Performance Real" value={currentMachine.perfReal} onChange={(v) => updateMachineField("perfReal", v)} placeholder="0.0" type="number" />
@@ -837,16 +837,16 @@ export default function FormularioVisitaPage() {
 
                   <hr className="my-4 border-[#dde3ec]" />
 
-                  <div className="mb-2 text-[11px] font-bold tracking-wider text-[#8494aa] uppercase">Granalla Instalada</div>
+                  <div className="mb-2 text-[13px] font-bold tracking-wider text-[#566778] uppercase">Granalla Instalada</div>
                   {currentMachine.granallInstalada.nombre_granalla ? (
-                    <div className="mb-2 text-xs text-[#8494aa]">
+                    <div className="mb-2 text-xs text-[#566778]">
                       Actual: <strong className="font-(family-name:--font-barlow-condensed) text-sm text-[#0f2137]">{currentMachine.granallInstalada.nombre_granalla}</strong>
                       {currentMachine.granallInstalada.medida && (
-                        <span className="ml-1.5 font-(family-name:--font-jetbrains) text-[10px] text-[#b0bacb]">{currentMachine.granallInstalada.medida}</span>
+                        <span className="ml-1.5 font-(family-name:--font-jetbrains) text-[12px] text-[#6b7c8b]">{currentMachine.granallInstalada.medida}</span>
                       )}
                     </div>
                   ) : (
-                    <div className="mb-2 text-xs italic text-[#8494aa]">Sin granalla instalada registrada</div>
+                    <div className="mb-2 text-xs italic text-[#566778]">Sin granalla instalada registrada</div>
                   )}
 
                   <label className="mb-3 flex cursor-pointer items-center gap-3">
@@ -860,7 +860,7 @@ export default function FormularioVisitaPage() {
 
                   {currentMachine.cambioGranalla && (
                     <div className="mb-4 flex flex-col gap-1.5">
-                      <label className="text-[11px] font-semibold tracking-wider text-[#8494aa] uppercase">Nueva Granalla</label>
+                      <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">Nueva Granalla</label>
                       <select
                         value={currentMachine.granallaCambioId ?? ""}
                         onChange={(e) => {
@@ -869,7 +869,7 @@ export default function FormularioVisitaPage() {
                           updateMachineField("granallaCambioId", id || null);
                           updateMachineField("granallaCambioNombre", gran?.nominacion_comercial ?? gran?.codigo_dooble ?? "");
                         }}
-                        className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] outline-none focus:border-[#1a5fa8]"
+                        className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8]"
                       >
                         <option value="">— Seleccionar —</option>
                         {granallasDB.map((g) => (
@@ -884,12 +884,12 @@ export default function FormularioVisitaPage() {
                   <hr className="my-4 border-[#dde3ec]" />
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[11px] font-semibold tracking-wider text-[#8494aa] uppercase">Comentarios Granalla</label>
+                    <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">Comentarios Granalla</label>
                     <textarea
                       placeholder="Estado del mix, observaciones..."
                       value={currentMachine.granallInstalada.comentarios}
                       onChange={(e) => updateMachineField("granallInstalada", { ...currentMachine.granallInstalada, comentarios: e.target.value })}
-                      className="min-h-18 resize-y rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] outline-none focus:border-[#1a5fa8] focus:bg-white"
+                      className="min-h-18 resize-y rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8] focus:bg-white"
                     />
                   </div>
                 </div>
@@ -901,7 +901,7 @@ export default function FormularioVisitaPage() {
               <SectionLabel>Evaluación y Recomendaciones</SectionLabel>
               <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <div className="mb-2 text-[11px] font-bold tracking-wider text-[#8494aa] uppercase">Estado de Máquina</div>
+                  <div className="mb-2 text-[13px] font-bold tracking-wider text-[#566778] uppercase">Estado de Máquina</div>
                   <div className="flex flex-wrap gap-2">
                     {([
                       { value: visitas_encabezado_evaluacion_estado.OPTIMA, label: "Óptima", color: "green" },
@@ -909,7 +909,7 @@ export default function FormularioVisitaPage() {
                       { value: visitas_encabezado_evaluacion_estado.FUNCIONAL, label: "Funcional", color: "yellow" },
                       { value: visitas_encabezado_evaluacion_estado.INOPERABLE, label: "Inoperable", color: "red" },
                     ] as const).map((opt) => (
-                      <label key={opt.value} className={`flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-xs font-semibold transition-colors ${currentMachine.estado === opt.value ? opt.color === "green" ? "border-[#1a9e5c] bg-[#e6f7f0] text-[#1a9e5c]" : opt.color === "yellow" ? "border-[#d4860a] bg-[#fdf3e3] text-[#d4860a]" : opt.color === "red" ? "border-[#d63b3b] bg-[#fdf0f0] text-[#d63b3b]" : "border-[#dde3ec] bg-[#f4f6f9] text-[#3d4f63]" : "border-[#dde3ec] bg-white text-[#8494aa] hover:bg-[#f4f6f9]"}`}>
+                      <label key={opt.value} className={`flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-xs font-semibold transition-colors ${currentMachine.estado === opt.value ? opt.color === "green" ? "border-[#1a9e5c] bg-[#e6f7f0] text-[#1a9e5c]" : opt.color === "yellow" ? "border-[#d4860a] bg-[#fdf3e3] text-[#d4860a]" : opt.color === "red" ? "border-[#d63b3b] bg-[#fdf0f0] text-[#d63b3b]" : "border-[#dde3ec] bg-[#f4f6f9] text-[#3d4f63]" : "border-[#dde3ec] bg-white text-[#566778] hover:bg-[#f4f6f9]"}`}>
                         <input type="radio" name="estado" value={opt.value} checked={currentMachine.estado === opt.value} onChange={() => updateMachineField("estado", opt.value)} className="sr-only" />
                         {opt.label}
                       </label>
@@ -917,14 +917,14 @@ export default function FormularioVisitaPage() {
                   </div>
                 </div>
                 <div>
-                  <div className="mb-2 text-[11px] font-bold tracking-wider text-[#8494aa] uppercase">Eficiencia de Proceso</div>
+                  <div className="mb-2 text-[13px] font-bold tracking-wider text-[#566778] uppercase">Eficiencia de Proceso</div>
                   <div className="flex flex-wrap gap-2">
                     {([
                       { value: visitas_encabezado_evaluacion_eficiencia.EFICIENTE__PARAMETROS_DENTRO_DE_RANGO, label: "Eficiente", color: "green" },
                       { value: visitas_encabezado_evaluacion_eficiencia.INEFICIENTE__PARAMETROS_DENTRO_DE_RANGO, label: "Ineficiente / Dentro de rango", color: "yellow" },
                       { value: visitas_encabezado_evaluacion_eficiencia.INEFICIENTE__PARAMETROS_FUERA_DE_RANGO, label: "Ineficiente / Fuera de rango", color: "red" },
                     ] as const).map((opt) => (
-                      <label key={opt.value} className={`flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-xs font-semibold transition-colors ${currentMachine.eficiencia === opt.value ? opt.color === "green" ? "border-[#1a9e5c] bg-[#e6f7f0] text-[#1a9e5c]" : opt.color === "yellow" ? "border-[#d4860a] bg-[#fdf3e3] text-[#d4860a]" : "border-[#d63b3b] bg-[#fdf0f0] text-[#d63b3b]" : "border-[#dde3ec] bg-white text-[#8494aa] hover:bg-[#f4f6f9]"}`}>
+                      <label key={opt.value} className={`flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-xs font-semibold transition-colors ${currentMachine.eficiencia === opt.value ? opt.color === "green" ? "border-[#1a9e5c] bg-[#e6f7f0] text-[#1a9e5c]" : opt.color === "yellow" ? "border-[#d4860a] bg-[#fdf3e3] text-[#d4860a]" : "border-[#d63b3b] bg-[#fdf0f0] text-[#d63b3b]" : "border-[#dde3ec] bg-white text-[#566778] hover:bg-[#f4f6f9]"}`}>
                         <input type="radio" name="eficiencia" value={opt.value} checked={currentMachine.eficiencia === opt.value} onChange={() => updateMachineField("eficiencia", opt.value)} className="sr-only" />
                         {opt.label}
                       </label>
@@ -934,12 +934,12 @@ export default function FormularioVisitaPage() {
               </div>
               <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold tracking-wider text-[#8494aa] uppercase">Recomendaciones de Máquina</label>
-                  <textarea placeholder="Una recomendación por línea..." value={currentMachine.recMaquina} onChange={(e) => updateMachineField("recMaquina", e.target.value)} className="min-h-18 resize-y rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] outline-none focus:border-[#1a5fa8] focus:bg-white" />
+                  <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">Recomendaciones de Máquina</label>
+                  <textarea placeholder="Una recomendación por línea..." value={currentMachine.recMaquina} onChange={(e) => updateMachineField("recMaquina", e.target.value)} className="min-h-18 resize-y rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8] focus:bg-white" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold tracking-wider text-[#8494aa] uppercase">Recomendaciones de Proceso</label>
-                  <textarea placeholder="Una recomendación por línea..." value={currentMachine.recProceso} onChange={(e) => updateMachineField("recProceso", e.target.value)} className="min-h-18 resize-y rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] outline-none focus:border-[#1a5fa8] focus:bg-white" />
+                  <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">Recomendaciones de Proceso</label>
+                  <textarea placeholder="Una recomendación por línea..." value={currentMachine.recProceso} onChange={(e) => updateMachineField("recProceso", e.target.value)} className="min-h-18 resize-y rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8] focus:bg-white" />
                 </div>
               </div>
             </div>
@@ -951,7 +951,7 @@ export default function FormularioVisitaPage() {
           <div>
             <div className="mb-5">
               <h2 className="font-(family-name:--font-barlow-condensed) text-[22px] font-bold text-[#0f2137]">Resumen y Cierre</h2>
-              <p className="mt-1 text-xs text-[#8494aa]">Revisa los kg/hr calculados — puedes ajustarlos manualmente antes de guardar. Los ajustes quedan marcados.</p>
+              <p className="mt-1 text-xs text-[#566778]">Revisa los kg/hr calculados — puedes ajustarlos manualmente antes de guardar. Los ajustes quedan marcados.</p>
             </div>
 
             {/* Stock resumen */}
@@ -967,11 +967,11 @@ export default function FormularioVisitaPage() {
                     const total = bodegaKg + pisoTotal;
                     return (
                       <div key={i} className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3.5 py-2.5">
-                        <div className="text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">{row.nombre || "—"}</div>
+                        <div className="text-[12px] font-bold tracking-wider text-[#566778] uppercase">{row.nombre || "—"}</div>
                         <div className="mt-1 font-(family-name:--font-jetbrains) text-xl font-bold text-[#0f2137]">
-                          {total.toLocaleString("es-MX")} <span className="text-[11px] font-normal text-[#8494aa]">kg</span>
+                          {total.toLocaleString("es-MX")} <span className="text-[13px] font-normal text-[#566778]">kg</span>
                         </div>
-                        <div className="mt-0.5 text-[10px] text-[#8494aa]">
+                        <div className="mt-0.5 text-[12px] text-[#566778]">
                           Bodega {bodegaKg.toLocaleString("es-MX")}{pisoTotal > 0 ? ` + Piso ${pisoTotal.toLocaleString("es-MX")}` : ""}
                         </div>
                       </div>
@@ -1004,11 +1004,11 @@ export default function FormularioVisitaPage() {
                     </div>
                     <div className="bg-white p-5">
                       <div className="flex justify-between border-b border-[#dde3ec] py-2 text-xs">
-                        <span className="text-[#8494aa]">Horómetro actual</span>
+                        <span className="text-[#566778]">Horómetro actual</span>
                         <span className="font-(family-name:--font-jetbrains) text-[#0f2137]">{md.horometro || "—"} hr</span>
                       </div>
                       <div className="flex justify-between border-b border-[#dde3ec] py-2 text-xs">
-                        <span className="text-[#8494aa]">Estado</span>
+                        <span className="text-[#566778]">Estado</span>
                         <span className="text-[#0f2137]">{md.estado.replace(/_/g, " ")}</span>
                       </div>
                       <div className="flex items-center justify-between pt-3">
@@ -1020,13 +1020,13 @@ export default function FormularioVisitaPage() {
                                 {displayVal ?? "—"}
                               </span>
                               {md.kghrAjustado && (
-                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[9px] font-bold tracking-wider text-[#d4860a] uppercase">
+                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[11px] font-bold tracking-wider text-[#d4860a] uppercase">
                                   Ajustado
                                 </span>
                               )}
                               <button
                                 onClick={() => toggleKghrEdit(i)}
-                                className="text-[10px] text-[#8494aa] underline hover:text-[#1a5fa8]"
+                                className="text-[12px] text-[#566778] underline hover:text-[#1a5fa8]"
                               >
                                 editar
                               </button>
@@ -1051,13 +1051,13 @@ export default function FormularioVisitaPage() {
                                 className="w-24 rounded border border-[#1a5fa8] px-2 py-1 text-center font-(family-name:--font-jetbrains) text-sm font-bold text-[#1a5fa8] outline-none"
                               />
                               {md.kghrAjustado && (
-                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[9px] font-bold tracking-wider text-[#d4860a] uppercase">
+                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[11px] font-bold tracking-wider text-[#d4860a] uppercase">
                                   Ajustado
                                 </span>
                               )}
                               <button
                                 onClick={() => toggleKghrEdit(i)}
-                                className="text-[10px] text-[#8494aa] underline hover:text-[#1a5fa8]"
+                                className="text-[12px] text-[#566778] underline hover:text-[#1a5fa8]"
                               >
                                 listo
                               </button>
@@ -1075,7 +1075,7 @@ export default function FormularioVisitaPage() {
               <div className="text-xs font-semibold text-[#d4860a]">
                 Al guardar se generarán <strong>{maquinasVisitadas} reportes</strong> — uno por cada máquina visitada.
               </div>
-              <div className="mt-1 text-[11px] text-[#8494aa]">
+              <div className="mt-1 text-[13px] text-[#566778]">
                 Los datos se guardan en la base de datos. Serás redirigido al primer reporte generado.
               </div>
             </div>
@@ -1094,7 +1094,7 @@ export default function FormularioVisitaPage() {
       {/* Footer fijo */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#dde3ec] bg-white shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
         <div className="mx-auto flex max-w-240 items-center justify-between px-6 py-3">
-          <div className="text-xs text-[#8494aa]">
+          <div className="text-xs text-[#566778]">
             {clienteData ? (
               <><strong className="text-[#3d4f63]">{clienteData.nombre}</strong> — {maquinasVisitadas} máquina{maquinasVisitadas !== 1 ? "s" : ""}</>
             ) : (

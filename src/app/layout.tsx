@@ -37,7 +37,7 @@ export default function RootLayout({
       lang="es"
       className={`${barlow.variable} ${barlowCondensed.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="bg-[#eef1f6] font-[family-name:var(--font-barlow)] text-[13px] leading-relaxed text-[#3d4f63]">
+      <body className="bg-[#eef1f6] font-[family-name:var(--font-barlow)] text-[15px] leading-relaxed text-[#3d4f63]">
         <Auth0Provider>
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </Auth0Provider>

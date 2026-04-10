@@ -46,7 +46,7 @@ function fmtNum(n: bigint | number | null | undefined) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-3 flex items-center gap-2.5 font-(family-name:--font-barlow-condensed) text-[11px] font-extrabold tracking-[0.2em] text-[#1a5fa8] uppercase">
+    <div className="mb-3 flex items-center gap-2.5 font-(family-name:--font-barlow-condensed) text-[13px] font-extrabold tracking-[0.2em] text-[#1a5fa8] uppercase">
       {children}
       <div className="h-px flex-1 bg-[#dde3ec]" />
     </div>
@@ -63,7 +63,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-[#8494aa]">
+      <div className="flex min-h-screen items-center justify-center text-[#566778]">
         Cargando reporte…
       </div>
     );
@@ -71,7 +71,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
 
   if (error || !data) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-[#8494aa]">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-[#566778]">
         <div className="text-lg font-semibold text-[#d63b3b]">
           Reporte no encontrado
         </div>
@@ -251,7 +251,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
             <div className="font-(family-name:--font-barlow-condensed) text-lg font-bold text-[#0f2137]">
               {maquina?.maquina_por_cliente ?? maquina?.tipo_maquina ?? "Máquina"}
             </div>
-            <div className="text-[11px] tracking-wide text-[#8494aa] uppercase">
+            <div className="text-[13px] tracking-wide text-[#566778] uppercase">
               {cliente?.nombre}
               {maquina?.numero_inplant ? ` · No. In-Plant: ${maquina.numero_inplant}` : ""}
               {ingeniero ? ` · ${ingeniero.nombre}` : ""}
@@ -261,22 +261,22 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
 
           {/* Report info */}
           <div className="flex flex-col items-end justify-center gap-0 border-l border-[#dde3ec] px-6 py-3.5">
-            <div className="font-(family-name:--font-jetbrains) text-[11px] font-semibold tracking-wide text-[#1a5fa8]">
+            <div className="font-(family-name:--font-jetbrains) text-[13px] font-semibold tracking-wide text-[#1a5fa8]">
               # {numReporte}
             </div>
-            <div className="mt-0.5 text-[11px] text-[#8494aa]">
+            <div className="mt-0.5 text-[13px] text-[#566778]">
               {fmtDate(visita.fecha_visita)}
             </div>
             <div className="mt-2 flex items-stretch gap-2.5">
               {/* Horómetro actual */}
               <div className="text-right">
-                <div className="text-[9px] tracking-widest text-[#8494aa] uppercase">
+                <div className="text-[11px] tracking-widest text-[#566778] uppercase">
                   Horómetro actual
                 </div>
                 <div className="font-(family-name:--font-jetbrains) text-xl leading-tight font-bold text-[#1a5fa8]">
                   {fmtNum(visita.horometro_lectura)}
                 </div>
-                <div className="text-[10px] text-[#8494aa]">hr</div>
+                <div className="text-[12px] text-[#566778]">hr</div>
               </div>
 
               {visitaAnterior && (
@@ -284,13 +284,13 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                   <div className="w-px bg-[#dde3ec]" />
                   {/* Visita anterior */}
                   <div className="text-right">
-                    <div className="text-[9px] tracking-widest text-[#8494aa] uppercase">
+                    <div className="text-[11px] tracking-widest text-[#566778] uppercase">
                       Visita anterior
                     </div>
                     <div className="font-(family-name:--font-jetbrains) text-sm leading-tight font-semibold text-[#3d4f63]">
                       {fmtNum(visitaAnterior.horometro_lectura)} hr
                     </div>
-                    <div className="text-[10px] text-[#8494aa]">
+                    <div className="text-[12px] text-[#566778]">
                       {fmtDate(visitaAnterior.fecha_visita)}
                     </div>
                   </div>
@@ -300,13 +300,13 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                       <div className="w-px bg-[#dde3ec]" />
                       {/* Delta */}
                       <div className="text-right">
-                        <div className="text-[9px] tracking-widest text-[#8494aa] uppercase">
+                        <div className="text-[11px] tracking-widest text-[#566778] uppercase">
                           Δ entre visitas
                         </div>
                         <div className="font-(family-name:--font-jetbrains) text-lg leading-tight font-bold text-[#1a9e5c]">
                           +{fmtNum(deltaHorometro)}
                         </div>
-                        <div className="text-[10px] text-[#8494aa]">
+                        <div className="text-[12px] text-[#566778]">
                           hr trabajadas
                         </div>
                       </div>
@@ -328,13 +328,13 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
             {/* Estado */}
             <div className="relative overflow-hidden rounded border border-[#dde3ec] bg-[#f9fafb] p-5">
               <div className="absolute top-0 right-0 left-0 h-0.75 bg-[#1a9e5c]" />
-              <div className="text-[10px] tracking-widest text-[#8494aa] uppercase">
+              <div className="text-[12px] tracking-widest text-[#566778] uppercase">
                 Estado de Máquina
               </div>
               <div className="mt-2 font-(family-name:--font-barlow-condensed) text-xl font-bold text-[#1a9e5c]">
                 {evalEstado}
               </div>
-              <div className="mt-2 flex items-center gap-1.5 text-[11px] text-[#8494aa]">
+              <div className="mt-2 flex items-center gap-1.5 text-[13px] text-[#566778]">
                 Horómetro{" "}
                 <span className="font-(family-name:--font-jetbrains) text-[#3d4f63]">
                   {fmtNum(visita.horometro_lectura)} hr
@@ -345,13 +345,13 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
             {/* Eficiencia */}
             <div className="relative overflow-hidden rounded border border-[#dde3ec] bg-[#f9fafb] p-5">
               <div className="absolute top-0 right-0 left-0 h-0.75 bg-[#1a9e5c]" />
-              <div className="text-[10px] tracking-widest text-[#8494aa] uppercase">
+              <div className="text-[12px] tracking-widest text-[#566778] uppercase">
                 Eficiencia de Proceso
               </div>
               <div className="mt-2 font-(family-name:--font-barlow-condensed) text-xl font-bold text-[#1a9e5c]">
                 {evalEficiencia}
               </div>
-              <div className="mt-2 flex items-center gap-1.5 text-[11px] text-[#8494aa]">
+              <div className="mt-2 flex items-center gap-1.5 text-[13px] text-[#566778]">
                 Parámetros{" "}
                 <span className="font-(family-name:--font-jetbrains) text-[#3d4f63]">
                   dentro de rango
@@ -361,7 +361,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
 
             {/* Recomendaciones */}
             <div className="rounded border border-[#dde3ec] bg-[#f9fafb] p-5">
-              <div className="mb-3 text-[10px] tracking-widest text-[#8494aa] uppercase">
+              <div className="mb-3 text-[12px] tracking-widest text-[#566778] uppercase">
                 Recomendaciones
               </div>
               {recommendations.length > 0 ? (
@@ -369,9 +369,9 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                   {recommendations.map((rec, i) => (
                     <li
                       key={i}
-                      className="flex gap-2.5 text-[12.5px] leading-relaxed text-[#3d4f63]"
+                      className="flex gap-2.5 text-[14px] leading-relaxed text-[#3d4f63]"
                     >
-                      <span className="font-(family-name:--font-jetbrains) text-[10px] text-[#1a5fa8]">
+                      <span className="font-(family-name:--font-jetbrains) text-[12px] text-[#1a5fa8]">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <span>{rec}</span>
@@ -379,7 +379,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                   ))}
                 </ul>
               ) : (
-                <p className="text-[12px] text-[#8494aa] italic">
+                <p className="text-[14px] text-[#566778] italic">
                   Sin recomendaciones registradas.
                 </p>
               )}
@@ -399,7 +399,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                     gridTemplateColumns: `90px repeat(${turbinasList.length}, 1fr)`,
                   }}
                 >
-                  <div className="text-[11px] font-bold tracking-wider text-[#1a5fa8] uppercase">
+                  <div className="text-[13px] font-bold tracking-wider text-[#1a5fa8] uppercase">
                     Paletas
                   </div>
                   {turbinasList.map((t) => (
@@ -417,15 +417,15 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                         />
                       </div>
                       <div
-                        className={`mt-1 font-(family-name:--font-jetbrains) text-[13px] font-semibold ${statusTextColor(t.status)}`}
+                        className={`mt-1 font-(family-name:--font-jetbrains) text-[15px] font-semibold ${statusTextColor(t.status)}`}
                       >
                         {t.pct}%
                       </div>
-                      <div className="mt-0.5 text-[11px] font-medium text-[#3d4f63]">
+                      <div className="mt-0.5 text-[13px] font-medium text-[#3d4f63]">
                         {fmtNum(t.hours)} hr
                       </div>
                       {t.amp !== null && (
-                        <div className="mt-0.5 text-[10px] text-[#8494aa]">
+                        <div className="mt-0.5 text-[12px] text-[#566778]">
                           {t.amp} A
                         </div>
                       )}
@@ -445,7 +445,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                     gridTemplateColumns: `90px repeat(${componentesVida.length}, 1fr)`,
                   }}
                 >
-                  <div className="text-[11px] font-bold tracking-wider text-[#1a5fa8] uppercase">
+                  <div className="text-[13px] font-bold tracking-wider text-[#1a5fa8] uppercase">
                     Otros
                   </div>
                   {componentesVida.map((c) => {
@@ -455,23 +455,23 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                         key={c.label}
                         className="rounded border border-[#dde3ec] bg-white p-3"
                       >
-                        <div className="mb-1.5 text-[11px] font-semibold tracking-wider text-[#3d4f63] uppercase">
+                        <div className="mb-1.5 text-[13px] font-semibold tracking-wider text-[#3d4f63] uppercase">
                           {c.label}
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#b0bacb]">
+                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#6b7c8b]">
                             <div
                               className={`h-full rounded-full ${statusColor(s)}`}
                               style={{ width: `${c.pct}%` }}
                             />
                           </div>
                           <span
-                            className={`font-(family-name:--font-jetbrains) text-[13px] font-semibold ${statusTextColor(s)}`}
+                            className={`font-(family-name:--font-jetbrains) text-[15px] font-semibold ${statusTextColor(s)}`}
                           >
                             {c.pct}%
                           </span>
                         </div>
-                        <div className="mt-1 text-[11px] font-medium text-[#3d4f63]">
+                        <div className="mt-1 text-[13px] font-medium text-[#3d4f63]">
                           {c.detail}
                         </div>
                       </div>
@@ -493,7 +493,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                   <div className="font-(family-name:--font-barlow-condensed) text-base font-bold text-[#0f2137]">
                     Consumo de Granalla por Hora Efectiva
                   </div>
-                  <div className="mt-0.5 text-[11px] text-[#8494aa]">
+                  <div className="mt-0.5 text-[13px] text-[#566778]">
                     Últimas {kghrData.length} lecturas
                   </div>
                 </div>
@@ -504,12 +504,12 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                         {kghrActual.toFixed(2)}
                       </div>
                       {kghrAjustado && (
-                        <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[9px] font-bold tracking-wider text-[#d4860a] uppercase">
+                        <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[11px] font-bold tracking-wider text-[#d4860a] uppercase">
                           Ajustado
                         </span>
                       )}
                     </div>
-                    <div className="text-[10px] tracking-wider text-[#8494aa] uppercase">
+                    <div className="text-[12px] tracking-wider text-[#566778] uppercase">
                       KG / HR actual
                     </div>
                   </div>
@@ -567,8 +567,8 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                         <text
                           x={p.x}
                           y={chartPadTop + innerH + 14}
-                          fill="#8494aa"
-                          fontSize="9"
+                          fill="#566778"
+                          fontSize="12"
                           fontFamily="var(--font-barlow)"
                           textAnchor="middle"
                         >
@@ -585,7 +585,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                       x={kghrPoints[kghrPoints.length - 1]!.x}
                       y={(kghrPoints[kghrPoints.length - 1]!.y ?? 0) - 10}
                       fill="#1a5fa8"
-                      fontSize="11"
+                      fontSize="13"
                       fontFamily="var(--font-jetbrains)"
                       textAnchor="middle"
                     >
@@ -611,7 +611,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                       <div className="font-(family-name:--font-barlow-condensed) text-base font-bold text-[#0f2137]">
                         {granInstalada?.nombre_granalla ?? "Granalla"}
                       </div>
-                      <div className="mt-0.5 text-[11px] text-[#8494aa]">
+                      <div className="mt-0.5 text-[13px] text-[#566778]">
                         {granInstalada?.medida}{" "}
                         {granInstalada?.detalle_material
                           ? `· ${granInstalada.detalle_material}`
@@ -619,13 +619,13 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                       </div>
                     </div>
                     {granInstalada?.comentarios && (
-                      <span className="rounded border border-[rgba(245,166,35,0.2)] bg-[rgba(245,166,35,0.12)] px-2 py-0.5 text-[10px] font-semibold tracking-wider text-[#d4860a] uppercase">
+                      <span className="rounded border border-[rgba(245,166,35,0.2)] bg-[rgba(245,166,35,0.12)] px-2 py-0.5 text-[12px] font-semibold tracking-wider text-[#d4860a] uppercase">
                         {granInstalada.comentarios}
                       </span>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-[60px_1fr_1fr_44px_44px_52px] gap-2 pb-2 text-[10px] font-bold tracking-wider text-[#3d4f63] uppercase">
+                  <div className="grid grid-cols-[60px_1fr_1fr_44px_44px_52px] gap-2 pb-2 text-[12px] font-bold tracking-wider text-[#3d4f63] uppercase">
                     <span>Malla</span>
                     <span>Ideal</span>
                     <span>Real</span>
@@ -689,17 +689,17 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                 <div className="flex flex-col gap-3.5 rounded border border-[#dde3ec] bg-[#f9fafb] p-5">
                   {/* Stock */}
                   <div>
-                    <div className="text-[10px] tracking-widest text-[#8494aa] uppercase">
+                    <div className="text-[12px] tracking-widest text-[#566778] uppercase">
                       Stock Granalla
                     </div>
                     <div className="mt-1 font-(family-name:--font-barlow-condensed) text-[26px] font-bold text-[#0f2137]">
                       {fmtNum(Math.round(stockTotal))}{" "}
-                      <span className="text-xs font-light text-[#8494aa]">
+                      <span className="text-xs font-light text-[#566778]">
                         kg
                       </span>
                     </div>
                     {stock && (
-                      <div className="mt-1 flex flex-col gap-0.5 text-[10px] text-[#8494aa]">
+                      <div className="mt-1 flex flex-col gap-0.5 text-[12px] text-[#566778]">
                         <span>Máquina: {fmtNum(Number(stock.kg_en_maquina ?? 0))} kg</span>
                         <span>Piso: {fmtNum(Number(stock.kg_piso ?? 0))} kg</span>
                         <span>Recuperada: {fmtNum(Number(stock.kg_recuperada ?? 0))} kg</span>
@@ -711,14 +711,14 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                     <>
                       <hr className="border-[#dde3ec]" />
                       <div>
-                        <div className="text-[10px] tracking-widest text-[#8494aa] uppercase">
+                        <div className="text-[12px] tracking-widest text-[#566778] uppercase">
                           Performance de Grano
                         </div>
                         <div className="mt-1 flex items-baseline gap-1.5">
                           <span className="font-(family-name:--font-jetbrains) text-xl text-[#d4860a]">
                             {Number(performance.porcentaje_real ?? 0).toFixed(0)}%
                           </span>
-                          <span className="text-[11px] text-[#8494aa]">
+                          <span className="text-[13px] text-[#566778]">
                             real vs{" "}
                             <span className="text-[#3d4f63]">
                               {Number(performance.porcentaje_ideal ?? 0).toFixed(0)}% ideal
@@ -741,13 +741,13 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                 {/* Granalla instalada */}
                 {granInstalada && (
                   <div className="rounded border border-[#dde3ec] bg-white p-4">
-                    <div className="mb-2 text-[10px] tracking-widest text-[#8494aa] uppercase">
+                    <div className="mb-2 text-[12px] tracking-widest text-[#566778] uppercase">
                       Granalla Instalada
                     </div>
-                    <div className="text-[13px] font-medium text-[#1a5fa8]">
+                    <div className="text-[15px] font-medium text-[#1a5fa8]">
                       {granInstalada.nombre_granalla}
                     </div>
-                    <div className="text-[11px] text-[#8494aa]">
+                    <div className="text-[13px] text-[#566778]">
                       {granInstalada.medida}
                       {granInstalada.detalle_material
                         ? ` · ${granInstalada.detalle_material}`
@@ -755,10 +755,10 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                     </div>
                     {granInstalada.comentarios && (
                       <div className="mt-2.5 rounded border border-[rgba(212,134,10,0.18)] bg-[rgba(212,134,10,0.07)] px-2.5 py-2">
-                        <div className="text-[9px] tracking-wider text-[#d4860a] uppercase">
+                        <div className="text-[11px] tracking-wider text-[#d4860a] uppercase">
                           Nota del técnico
                         </div>
-                        <div className="mt-1 text-[11px] leading-relaxed text-[#3d4f63]">
+                        <div className="mt-1 text-[13px] leading-relaxed text-[#3d4f63]">
                           {granInstalada.comentarios}
                         </div>
                       </div>
@@ -773,11 +773,11 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
 
       {/* Footer */}
       <div className="mx-auto flex max-w-300 items-center justify-between border-t-2 border-[#1a5fa8] px-6 py-3.5">
-        <div className="text-[10px] tracking-wide text-[#8494aa]">
+        <div className="text-[12px] tracking-wide text-[#566778]">
           DOOBLE In-Plant Support · Reporte generado automáticamente desde base
           de datos
         </div>
-        <div className="font-(family-name:--font-jetbrains) text-[10px] text-[#b0bacb]">
+        <div className="font-(family-name:--font-jetbrains) text-[12px] text-[#6b7c8b]">
           {numReporte} · {fmtDate(visita.fecha_visita)}
         </div>
       </div>
@@ -791,7 +791,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
 
 const ESTADO_LABEL: Record<string, { label: string; color: string; dot: string }> = {
   OPTIMA: { label: "Óptima", color: "text-[#1a9e5c]", dot: "bg-[#1a9e5c]" },
-  BUENAS_CONDICIONES: { label: "Buenas condiciones", color: "text-[#3d4f63]", dot: "bg-[#8494aa]" },
+  BUENAS_CONDICIONES: { label: "Buenas condiciones", color: "text-[#3d4f63]", dot: "bg-[#566778]" },
   FUNCIONAL: { label: "Funcional", color: "text-[#d4860a]", dot: "bg-[#d4860a]" },
   INOPERABLE: { label: "Inoperable", color: "text-[#d63b3b]", dot: "bg-[#d63b3b]" },
 };
@@ -849,7 +849,7 @@ function ReportesLista() {
           >
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
           </Link>
-          <span className="font-(family-name:--font-barlow-condensed) text-sm font-semibold tracking-wide text-[#8494aa] uppercase">
+          <span className="font-(family-name:--font-barlow-condensed) text-sm font-semibold tracking-wide text-[#566778] uppercase">
             Reportes de Visita
           </span>
           <div className="flex-1" />
@@ -865,7 +865,7 @@ function ReportesLista() {
       <div className="mx-auto max-w-5xl px-6 py-8">
         {/* Filtro */}
         <div className="mb-6 flex items-center gap-3">
-          <label className="text-[11px] font-semibold tracking-wider text-[#8494aa] uppercase">
+          <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">
             Cliente
           </label>
           <select
@@ -873,7 +873,7 @@ function ReportesLista() {
             onChange={(e) =>
               setClienteId(e.target.value ? parseInt(e.target.value) : null)
             }
-            className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[13px] text-[#0f2137] outline-none focus:border-[#1a5fa8] focus:bg-white"
+            className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] text-[#0f2137] outline-none focus:border-[#1a5fa8] focus:bg-white"
           >
             <option value="">Todos los clientes</option>
             {clientes.map((c) => (
@@ -885,29 +885,29 @@ function ReportesLista() {
           {clienteId && (
             <button
               onClick={() => setClienteId(null)}
-              className="text-xs text-[#8494aa] underline hover:text-[#d63b3b]"
+              className="text-xs text-[#566778] underline hover:text-[#d63b3b]"
             >
               Limpiar
             </button>
           )}
-          <span className="ml-auto text-xs text-[#b0bacb]">
+          <span className="ml-auto text-xs text-[#6b7c8b]">
             {sortedVisitas.length} reporte{sortedVisitas.length !== 1 ? "s" : ""}
           </span>
         </div>
 
         {/* Lista */}
         {isLoading ? (
-          <div className="py-20 text-center text-sm text-[#8494aa]">
+          <div className="py-20 text-center text-sm text-[#566778]">
             Cargando reportes…
           </div>
         ) : sortedVisitas.length === 0 ? (
-          <div className="py-20 text-center text-sm text-[#8494aa]">
+          <div className="py-20 text-center text-sm text-[#566778]">
             No hay reportes registrados.
           </div>
         ) : (
           <div className="overflow-hidden rounded-lg border border-[#dde3ec] bg-white">
             {/* Header tabla */}
-            <div className="grid grid-cols-[auto_2fr_2fr_1fr_1fr_auto] items-center gap-4 border-b border-[#dde3ec] bg-[#f4f6f9] px-5 py-2.5 text-[10px] font-bold tracking-wider text-[#8494aa] uppercase">
+            <div className="grid grid-cols-[auto_2fr_2fr_1fr_1fr_auto] items-center gap-4 border-b border-[#dde3ec] bg-[#f4f6f9] px-5 py-2.5 text-[12px] font-bold tracking-wider text-[#566778] uppercase">
               <span className="w-4" />
               <span>Máquina / Cliente</span>
               <button
@@ -957,33 +957,33 @@ function ReportesLista() {
                         maquina?.tipo_maquina ??
                         "—"}
                     </div>
-                    <div className="text-[11px] text-[#8494aa]">
+                    <div className="text-[13px] text-[#566778]">
                       {cliente?.nombre ?? "—"}
                     </div>
                   </div>
 
                   {/* Fecha */}
                   <div>
-                    <div className="text-[13px] text-[#3d4f63]">
+                    <div className="text-[15px] text-[#3d4f63]">
                       {fmtDate(v.fecha_visita)}
                     </div>
-                    <div className={`mt-0.5 text-[10px] font-semibold ${estadoInfo.color}`}>
+                    <div className={`mt-0.5 text-[12px] font-semibold ${estadoInfo.color}`}>
                       {estadoInfo.label}
                     </div>
                   </div>
 
                   {/* Reporte # */}
-                  <div className="font-(family-name:--font-jetbrains) text-[12px] font-semibold text-[#1a5fa8]">
+                  <div className="font-(family-name:--font-jetbrains) text-[14px] font-semibold text-[#1a5fa8]">
                     {numReporte}
                   </div>
 
                   {/* Horómetro */}
-                  <div className="font-(family-name:--font-jetbrains) text-[12px] text-[#3d4f63]">
+                  <div className="font-(family-name:--font-jetbrains) text-[14px] text-[#3d4f63]">
                     {fmtNum(v.horometro_lectura)} hr
                   </div>
 
                   {/* CTA */}
-                  <div className="flex items-center gap-1 text-[11px] font-semibold text-[#1a5fa8]">
+                  <div className="flex items-center gap-1 text-[13px] font-semibold text-[#1a5fa8]">
                     Ver
                     <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
