@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Barlow, Barlow_Condensed, JetBrains_Mono } from "next/font/google";
+import { Barlow_Condensed, JetBrains_Mono, Outfit } from "next/font/google";
 import { Auth0Provider } from "@auth0/nextjs-auth0/client";
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -11,10 +11,10 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const barlow = Barlow({
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-barlow",
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-outfit",
 });
 
 const barlowCondensed = Barlow_Condensed({
@@ -35,9 +35,9 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${barlow.variable} ${barlowCondensed.variable} ${jetbrainsMono.variable}`}
+      className={`${outfit.variable} ${barlowCondensed.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="bg-[#eef1f6] font-[family-name:var(--font-barlow)] text-[15px] leading-relaxed text-[#3d4f63]">
+      <body className="bg-[#eef1f6] font-[family-name:var(--font-outfit)] text-[15px] leading-relaxed text-[#3d4f63]">
         <Auth0Provider>
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </Auth0Provider>

@@ -99,7 +99,7 @@ function defaultMachineData(m: MaquinaDB): MachineData {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-3 flex items-center gap-2.5 font-(family-name:--font-barlow-condensed) text-[13px] font-extrabold tracking-[0.2em] text-[#1a5fa8] uppercase">
+    <div className="mb-3 flex items-center gap-2.5 text-[13px] font-extrabold tracking-[0.2em] text-[#1a5fa8] uppercase">
       {children}
       <div className="h-px flex-1 bg-[#dde3ec]" />
     </div>
@@ -122,7 +122,7 @@ function FieldMono({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[15px] text-[#0f2137] outline-none transition-colors focus:border-[#1a5fa8] focus:bg-white"
+        className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] text-[#0f2137] outline-none transition-colors focus:border-[#1a5fa8] focus:bg-white"
       />
       {hint && <span className="text-[12px] text-[#6b7c8b]">{hint}</span>}
     </div>
@@ -431,15 +431,15 @@ export default function FormularioVisitaPage() {
         <div className="mx-auto flex max-w-240 items-center gap-4 px-6 py-3">
           <Link
             href="/home"
-            className="font-(family-name:--font-barlow-condensed) text-base font-black tracking-wider text-[#0f2137]"
+            className=" text-base font-black tracking-wider text-[#0f2137]"
           >
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
           </Link>
-          <span className="font-(family-name:--font-barlow-condensed) text-sm font-semibold tracking-wide text-[#566778] uppercase">
+          <span className=" text-sm font-semibold tracking-wide text-[#566778] uppercase">
             Nueva Visita Técnica
           </span>
           <div className="flex-1" />
-          <span className="font-(family-name:--font-jetbrains) text-xs text-[#566778]">
+          <span className=" text-xs text-[#566778]">
             Paso <span className="font-semibold text-[#1a5fa8]">{step}</span> de 4
           </span>
         </div>
@@ -466,7 +466,7 @@ export default function FormularioVisitaPage() {
               {i < 3 && (
                 <div className="absolute top-3.5 left-1/2 right-[-50%] h-0.5 bg-[#dde3ec]" />
               )}
-              <div className={`relative z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 font-(family-name:--font-jetbrains) text-[13px] font-semibold transition-all ${isActive ? "border-[#1a5fa8] bg-[#1a5fa8] text-white" : isDone ? "border-[#1a9e5c] bg-[#1a9e5c] text-white" : "border-[#dde3ec] bg-white text-[#6b7c8b]"}`}>
+              <div className={`relative z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 text-[13px] font-semibold transition-all ${isActive ? "border-[#1a5fa8] bg-[#1a5fa8] text-white" : isDone ? "border-[#1a9e5c] bg-[#1a9e5c] text-white" : "border-[#dde3ec] bg-white text-[#6b7c8b]"}`}>
                 {isDone ? "✓" : n}
               </div>
               <span className={`text-[12px] font-semibold tracking-wider uppercase ${isActive ? "text-[#1a5fa8]" : isDone ? "text-[#1a9e5c]" : "text-[#6b7c8b]"}`}>
@@ -484,7 +484,7 @@ export default function FormularioVisitaPage() {
         {step === 1 && (
           <div>
             <div className="mb-5">
-              <h2 className="font-(family-name:--font-barlow-condensed) text-[22px] font-bold text-[#0f2137]">Cliente y Fecha</h2>
+              <h2 className=" text-[22px] font-bold text-[#0f2137]">Cliente y Fecha</h2>
               <p className="mt-1 text-xs text-[#566778]">Selecciona el cliente y la fecha de la visita.</p>
             </div>
 
@@ -519,7 +519,7 @@ export default function FormularioVisitaPage() {
 
               {clienteData && (
                 <div className="mt-4 rounded border border-[#dde3ec] bg-[#f4f6f9] p-4">
-                  <div className="font-(family-name:--font-barlow-condensed) text-lg font-bold text-[#0f2137]">{clienteData.nombre}</div>
+                  <div className=" text-lg font-bold text-[#0f2137]">{clienteData.nombre}</div>
                   <div className="mt-2 flex flex-wrap gap-4 text-xs text-[#566778]">
                     <span>{clienteData.num_maquinas} máquinas activas</span>
                     {clienteData.ultima_visita && (
@@ -552,11 +552,11 @@ export default function FormularioVisitaPage() {
                         className="h-4 w-4 accent-[#1a5fa8]"
                       />
                       <div>
-                        <span className="font-(family-name:--font-barlow-condensed) text-[15px] font-semibold text-[#0f2137]">
+                        <span className=" text-[15px] font-semibold text-[#0f2137]">
                           {m.numero_inplant} — {m.maquina_por_cliente ?? m.tipo_maquina}
                         </span>
                         {m.ultima_visita_fecha && (
-                          <span className="ml-3 font-(family-name:--font-jetbrains) text-[12px] text-[#566778]">
+                          <span className="ml-3 text-[12px] text-[#566778]">
                             última visita: {new Date(m.ultima_visita_fecha).toLocaleDateString("es-MX", { day: "2-digit", month: "short" })}
                             {m.ultima_visita_horometro ? ` · ${m.ultima_visita_horometro.toLocaleString()} hr` : ""}
                           </span>
@@ -575,7 +575,7 @@ export default function FormularioVisitaPage() {
         {step === 2 && (
           <div>
             <div className="mb-5">
-              <h2 className="font-(family-name:--font-barlow-condensed) text-[22px] font-bold text-[#0f2137]">Stock y Compras del Periodo</h2>
+              <h2 className=" text-[22px] font-bold text-[#0f2137]">Stock y Compras del Periodo</h2>
               <p className="mt-1 text-xs text-[#566778]">Stock actual en bodega y compras desde la última visita.</p>
             </div>
 
@@ -613,9 +613,9 @@ export default function FormularioVisitaPage() {
                     placeholder="0"
                     value={row.kg}
                     onChange={(e) => setBodegaRows((prev) => prev.map((r, j) => j === i ? { ...r, kg: e.target.value } : r))}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[15px] outline-none focus:border-[#1a5fa8]"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8]"
                   />
-                  <span className="font-(family-name:--font-jetbrains) text-[14px] text-[#566778]">
+                  <span className=" text-[14px] text-[#566778]">
                     {refAnt ? `${Number(refAnt.kg_bodega).toLocaleString("es-MX")} kg` : "—"}
                   </span>
                   <button
@@ -684,14 +684,14 @@ export default function FormularioVisitaPage() {
                     placeholder="0 kg"
                     value={row.kg}
                     onChange={(e) => setCompraRows((prev) => prev.map((r, j) => j === i ? { ...r, kg: e.target.value } : r))}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[15px] outline-none focus:border-[#1a5fa8]"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8]"
                   />
                   <input
                     type="text"
                     placeholder="OV-2025-441"
                     value={row.ov}
                     onChange={(e) => setCompraRows((prev) => prev.map((r, j) => j === i ? { ...r, ov: e.target.value } : r))}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 font-(family-name:--font-jetbrains) text-[15px] outline-none focus:border-[#1a5fa8]"
+                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] outline-none focus:border-[#1a5fa8]"
                   />
                   <button
                     onClick={() => setCompraRows((prev) => prev.filter((_, j) => j !== i))}
@@ -713,7 +713,7 @@ export default function FormularioVisitaPage() {
         {step === 3 && currentMachine && (
           <div>
             <div className="mb-5">
-              <h2 className="font-(family-name:--font-barlow-condensed) text-[22px] font-bold text-[#0f2137]">Datos por Máquina</h2>
+              <h2 className=" text-[22px] font-bold text-[#0f2137]">Datos por Máquina</h2>
               <p className="mt-1 text-xs text-[#566778]">Completa los datos de cada máquina visitada.</p>
             </div>
 
@@ -761,7 +761,7 @@ export default function FormularioVisitaPage() {
                           placeholder="—"
                           value={amp.value}
                           onChange={(e) => updateAmpValue(amp.num_turbina, e.target.value)}
-                          className="w-20 rounded border-2 border-[#dde3ec] bg-[#f4f6f9] px-2 py-2 text-center font-(family-name:--font-jetbrains) text-lg font-semibold text-[#0f2137] outline-none focus:border-[#1a5fa8]"
+                          className="w-20 rounded border-2 border-[#dde3ec] bg-[#f4f6f9] px-2 py-2 text-center text-lg font-semibold text-[#0f2137] outline-none focus:border-[#1a5fa8]"
                         />
                         {mdb?.amp_vacio !== null && (
                           <span className="text-[11px] text-[#6b7c8b]">vacío {mdb?.amp_vacio} A</span>
@@ -773,8 +773,8 @@ export default function FormularioVisitaPage() {
                 {maquinasDB[activeMachine]?.amp_maximo && (
                   <div className="min-w-35">
                     <div className="mb-1.5 text-[12px] font-bold tracking-wider text-[#566778] uppercase">Referencia</div>
-                    <div className="text-xs text-[#3d4f63]">Vacío: <strong className="font-(family-name:--font-jetbrains)">{maquinasDB[activeMachine]?.amp_vacio} A</strong></div>
-                    <div className="text-xs text-[#3d4f63]">Máximo: <strong className="font-(family-name:--font-jetbrains)">{maquinasDB[activeMachine]?.amp_maximo} A</strong></div>
+                    <div className="text-xs text-[#3d4f63]">Vacío: <strong className="">{maquinasDB[activeMachine]?.amp_vacio} A</strong></div>
+                    <div className="text-xs text-[#3d4f63]">Máximo: <strong className="">{maquinasDB[activeMachine]?.amp_maximo} A</strong></div>
                   </div>
                 )}
               </div>
@@ -793,7 +793,7 @@ export default function FormularioVisitaPage() {
                     const barW = (val / granMax) * 100;
                     return (
                       <div key={mesh} className="grid grid-cols-[70px_1fr_56px] items-center gap-2 border-b border-[#dde3ec] py-1.5 last:border-0">
-                        <span className={`font-(family-name:--font-jetbrains) text-[14px] font-semibold ${mesh === "POLVO" ? "text-[#566778]" : "text-[#1a5fa8]"}`}>
+                        <span className={` text-[14px] font-semibold ${mesh === "POLVO" ? "text-[#566778]" : "text-[#1a5fa8]"}`}>
                           {mesh}
                         </span>
                         <div className="relative h-7">
@@ -810,16 +810,16 @@ export default function FormularioVisitaPage() {
                             placeholder="0"
                             value={val || ""}
                             onChange={(e) => updateGranValue(idx, parseFloat(e.target.value) || 0)}
-                            className="absolute inset-0 w-full bg-transparent px-2 text-center font-(family-name:--font-jetbrains) text-[15px] font-semibold text-[#0f2137] outline-none"
+                            className="absolute inset-0 w-full bg-transparent px-2 text-center text-[15px] font-semibold text-[#0f2137] outline-none"
                           />
                         </div>
-                        <span className="text-right font-(family-name:--font-jetbrains) text-[15px] font-semibold text-[#566778]">{pct}%</span>
+                        <span className="text-right text-[15px] font-semibold text-[#566778]">{pct}%</span>
                       </div>
                     );
                   })}
                   <div className="mt-2 flex items-center justify-between border-t border-[#dde3ec] pt-2">
                     <span className="text-[13px] font-bold tracking-wider text-[#566778] uppercase">Total</span>
-                    <span className={`font-(family-name:--font-jetbrains) text-sm font-bold ${granTotal === 0 ? "text-[#d4860a]" : granTotal >= 190 && granTotal <= 210 ? "text-[#1a9e5c]" : granTotal >= 150 && granTotal <= 250 ? "text-[#d4860a]" : "text-[#d63b3b]"}`}>
+                    <span className={` text-sm font-bold ${granTotal === 0 ? "text-[#d4860a]" : granTotal >= 190 && granTotal <= 210 ? "text-[#1a9e5c]" : granTotal >= 150 && granTotal <= 250 ? "text-[#d4860a]" : "text-[#d63b3b]"}`}>
                       {granTotal} g
                     </span>
                   </div>
@@ -840,9 +840,9 @@ export default function FormularioVisitaPage() {
                   <div className="mb-2 text-[13px] font-bold tracking-wider text-[#566778] uppercase">Granalla Instalada</div>
                   {currentMachine.granallInstalada.nombre_granalla ? (
                     <div className="mb-2 text-xs text-[#566778]">
-                      Actual: <strong className="font-(family-name:--font-barlow-condensed) text-sm text-[#0f2137]">{currentMachine.granallInstalada.nombre_granalla}</strong>
+                      Actual: <strong className=" text-sm text-[#0f2137]">{currentMachine.granallInstalada.nombre_granalla}</strong>
                       {currentMachine.granallInstalada.medida && (
-                        <span className="ml-1.5 font-(family-name:--font-jetbrains) text-[12px] text-[#6b7c8b]">{currentMachine.granallInstalada.medida}</span>
+                        <span className="ml-1.5 text-[12px] text-[#6b7c8b]">{currentMachine.granallInstalada.medida}</span>
                       )}
                     </div>
                   ) : (
@@ -950,7 +950,7 @@ export default function FormularioVisitaPage() {
         {step === 4 && (
           <div>
             <div className="mb-5">
-              <h2 className="font-(family-name:--font-barlow-condensed) text-[22px] font-bold text-[#0f2137]">Resumen y Cierre</h2>
+              <h2 className=" text-[22px] font-bold text-[#0f2137]">Resumen y Cierre</h2>
               <p className="mt-1 text-xs text-[#566778]">Revisa los kg/hr calculados — puedes ajustarlos manualmente antes de guardar. Los ajustes quedan marcados.</p>
             </div>
 
@@ -968,7 +968,7 @@ export default function FormularioVisitaPage() {
                     return (
                       <div key={i} className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3.5 py-2.5">
                         <div className="text-[12px] font-bold tracking-wider text-[#566778] uppercase">{row.nombre || "—"}</div>
-                        <div className="mt-1 font-(family-name:--font-jetbrains) text-xl font-bold text-[#0f2137]">
+                        <div className="mt-1 text-xl font-bold text-[#0f2137]">
                           {total.toLocaleString("es-MX")} <span className="text-[13px] font-normal text-[#566778]">kg</span>
                         </div>
                         <div className="mt-0.5 text-[12px] text-[#566778]">
@@ -998,14 +998,14 @@ export default function FormularioVisitaPage() {
                 return (
                   <div key={m.id_maquina} className="overflow-hidden rounded-md border border-[#dde3ec]">
                     <div className="flex items-center justify-between bg-[#1a5fa8] px-5 py-3">
-                      <div className="font-(family-name:--font-barlow-condensed) text-sm font-bold text-white">
+                      <div className=" text-sm font-bold text-white">
                         {m.numero_inplant} — {clienteData?.nombre}
                       </div>
                     </div>
                     <div className="bg-white p-5">
                       <div className="flex justify-between border-b border-[#dde3ec] py-2 text-xs">
                         <span className="text-[#566778]">Horómetro actual</span>
-                        <span className="font-(family-name:--font-jetbrains) text-[#0f2137]">{md.horometro || "—"} hr</span>
+                        <span className=" text-[#0f2137]">{md.horometro || "—"} hr</span>
                       </div>
                       <div className="flex justify-between border-b border-[#dde3ec] py-2 text-xs">
                         <span className="text-[#566778]">Estado</span>
@@ -1016,11 +1016,11 @@ export default function FormularioVisitaPage() {
                         <div className="flex items-center gap-2">
                           {!isEditing ? (
                             <>
-                              <span className="font-(family-name:--font-jetbrains) text-[22px] font-bold text-[#1a5fa8]">
+                              <span className=" text-[22px] font-bold text-[#1a5fa8]">
                                 {displayVal ?? "—"}
                               </span>
                               {md.kghrAjustado && (
-                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[11px] font-bold tracking-wider text-[#d4860a] uppercase">
+                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 text-[11px] font-bold tracking-wider text-[#d4860a] uppercase">
                                   Ajustado
                                 </span>
                               )}
@@ -1048,10 +1048,10 @@ export default function FormularioVisitaPage() {
                                     ),
                                   );
                                 }}
-                                className="w-24 rounded border border-[#1a5fa8] px-2 py-1 text-center font-(family-name:--font-jetbrains) text-sm font-bold text-[#1a5fa8] outline-none"
+                                className="w-24 rounded border border-[#1a5fa8] px-2 py-1 text-center text-sm font-bold text-[#1a5fa8] outline-none"
                               />
                               {md.kghrAjustado && (
-                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[11px] font-bold tracking-wider text-[#d4860a] uppercase">
+                                <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 text-[11px] font-bold tracking-wider text-[#d4860a] uppercase">
                                   Ajustado
                                 </span>
                               )}

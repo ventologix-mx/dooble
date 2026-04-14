@@ -27,7 +27,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md rounded-lg bg-white p-10 shadow-2xl">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <h1 className="font-(family-name:--font-barlow-condensed) text-3xl font-black tracking-wider text-[#0f2137]">
+          <h1 className=" text-3xl font-black tracking-wider text-[#0f2137]">
             DOOBLE
           </h1>
         </div>

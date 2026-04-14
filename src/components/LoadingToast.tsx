@@ -28,7 +28,7 @@ export function LoadingToast({ loading }: { loading: boolean }) {
           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
         />
       </svg>
-      <span className="font-(family-name:--font-barlow-condensed) text-[12px] font-semibold tracking-wide text-[#3d4f63]">
+      <span className=" text-[12px] font-semibold tracking-wide text-[#3d4f63]">
         Obteniendo datos…
       </span>
     </div>

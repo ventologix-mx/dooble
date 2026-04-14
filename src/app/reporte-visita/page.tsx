@@ -46,7 +46,7 @@ function fmtNum(n: bigint | number | null | undefined) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-3 flex items-center gap-2.5 font-(family-name:--font-barlow-condensed) text-[13px] font-extrabold tracking-[0.2em] text-[#1a5fa8] uppercase">
+    <div className="mb-3 flex items-center gap-2.5 text-[13px] font-extrabold tracking-[0.2em] text-[#1a5fa8] uppercase">
       {children}
       <div className="h-px flex-1 bg-[#dde3ec]" />
     </div>
@@ -240,7 +240,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
           <div className="flex items-center gap-3 border-r border-[#dde3ec] px-6 py-3.5">
             <Link
               href="/home"
-              className="font-(family-name:--font-barlow-condensed) text-[17px] font-black tracking-wider text-[#0f2137]"
+              className=" text-[17px] font-black tracking-wider text-[#0f2137]"
             >
               DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
             </Link>
@@ -248,7 +248,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
 
           {/* Machine info */}
           <div className="flex flex-col justify-center px-6 py-3.5">
-            <div className="font-(family-name:--font-barlow-condensed) text-lg font-bold text-[#0f2137]">
+            <div className=" text-lg font-bold text-[#0f2137]">
               {maquina?.maquina_por_cliente ?? maquina?.tipo_maquina ?? "Máquina"}
             </div>
             <div className="text-[13px] tracking-wide text-[#566778] uppercase">
@@ -261,7 +261,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
 
           {/* Report info */}
           <div className="flex flex-col items-end justify-center gap-0 border-l border-[#dde3ec] px-6 py-3.5">
-            <div className="font-(family-name:--font-jetbrains) text-[13px] font-semibold tracking-wide text-[#1a5fa8]">
+            <div className=" text-[13px] font-semibold tracking-wide text-[#1a5fa8]">
               # {numReporte}
             </div>
             <div className="mt-0.5 text-[13px] text-[#566778]">
@@ -273,7 +273,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                 <div className="text-[11px] tracking-widest text-[#566778] uppercase">
                   Horómetro actual
                 </div>
-                <div className="font-(family-name:--font-jetbrains) text-xl leading-tight font-bold text-[#1a5fa8]">
+                <div className=" text-xl leading-tight font-bold text-[#1a5fa8]">
                   {fmtNum(visita.horometro_lectura)}
                 </div>
                 <div className="text-[12px] text-[#566778]">hr</div>
@@ -287,7 +287,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                     <div className="text-[11px] tracking-widest text-[#566778] uppercase">
                       Visita anterior
                     </div>
-                    <div className="font-(family-name:--font-jetbrains) text-sm leading-tight font-semibold text-[#3d4f63]">
+                    <div className=" text-sm leading-tight font-semibold text-[#3d4f63]">
                       {fmtNum(visitaAnterior.horometro_lectura)} hr
                     </div>
                     <div className="text-[12px] text-[#566778]">
@@ -303,7 +303,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                         <div className="text-[11px] tracking-widest text-[#566778] uppercase">
                           Δ entre visitas
                         </div>
-                        <div className="font-(family-name:--font-jetbrains) text-lg leading-tight font-bold text-[#1a9e5c]">
+                        <div className=" text-lg leading-tight font-bold text-[#1a9e5c]">
                           +{fmtNum(deltaHorometro)}
                         </div>
                         <div className="text-[12px] text-[#566778]">
@@ -331,12 +331,12 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
               <div className="text-[12px] tracking-widest text-[#566778] uppercase">
                 Estado de Máquina
               </div>
-              <div className="mt-2 font-(family-name:--font-barlow-condensed) text-xl font-bold text-[#1a9e5c]">
+              <div className="mt-2 text-xl font-bold text-[#1a9e5c]">
                 {evalEstado}
               </div>
               <div className="mt-2 flex items-center gap-1.5 text-[13px] text-[#566778]">
                 Horómetro{" "}
-                <span className="font-(family-name:--font-jetbrains) text-[#3d4f63]">
+                <span className=" text-[#3d4f63]">
                   {fmtNum(visita.horometro_lectura)} hr
                 </span>
               </div>
@@ -348,12 +348,12 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
               <div className="text-[12px] tracking-widest text-[#566778] uppercase">
                 Eficiencia de Proceso
               </div>
-              <div className="mt-2 font-(family-name:--font-barlow-condensed) text-xl font-bold text-[#1a9e5c]">
+              <div className="mt-2 text-xl font-bold text-[#1a9e5c]">
                 {evalEficiencia}
               </div>
               <div className="mt-2 flex items-center gap-1.5 text-[13px] text-[#566778]">
                 Parámetros{" "}
-                <span className="font-(family-name:--font-jetbrains) text-[#3d4f63]">
+                <span className=" text-[#3d4f63]">
                   dentro de rango
                 </span>
               </div>
@@ -371,7 +371,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                       key={i}
                       className="flex gap-2.5 text-[14px] leading-relaxed text-[#3d4f63]"
                     >
-                      <span className="font-(family-name:--font-jetbrains) text-[12px] text-[#1a5fa8]">
+                      <span className=" text-[12px] text-[#1a5fa8]">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <span>{rec}</span>
@@ -407,7 +407,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                       key={t.name}
                       className="rounded border border-[#c8d4e3] bg-white p-2.5"
                     >
-                      <div className="mb-1.5 font-(family-name:--font-barlow-condensed) text-[15px] font-bold text-[#0f2137]">
+                      <div className="mb-1.5 text-[15px] font-bold text-[#0f2137]">
                         {t.name}
                       </div>
                       <div className="h-1.75 overflow-hidden rounded-sm bg-[#dde3ec]">
@@ -417,7 +417,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                         />
                       </div>
                       <div
-                        className={`mt-1 font-(family-name:--font-jetbrains) text-[15px] font-semibold ${statusTextColor(t.status)}`}
+                        className={`mt-1 text-[15px] font-semibold ${statusTextColor(t.status)}`}
                       >
                         {t.pct}%
                       </div>
@@ -466,7 +466,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                             />
                           </div>
                           <span
-                            className={`font-(family-name:--font-jetbrains) text-[15px] font-semibold ${statusTextColor(s)}`}
+                            className={` text-[15px] font-semibold ${statusTextColor(s)}`}
                           >
                             {c.pct}%
                           </span>
@@ -490,7 +490,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
             <div className="rounded border border-[#dde3ec] bg-[#f9fafb] p-5">
               <div className="mb-4 flex items-start justify-between">
                 <div>
-                  <div className="font-(family-name:--font-barlow-condensed) text-base font-bold text-[#0f2137]">
+                  <div className=" text-base font-bold text-[#0f2137]">
                     Consumo de Granalla por Hora Efectiva
                   </div>
                   <div className="mt-0.5 text-[13px] text-[#566778]">
@@ -500,11 +500,11 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                 {kghrActual !== null && (
                   <div className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <div className="font-(family-name:--font-jetbrains) text-[22px] font-bold text-[#1a5fa8]">
+                      <div className=" text-[22px] font-bold text-[#1a5fa8]">
                         {kghrActual.toFixed(2)}
                       </div>
                       {kghrAjustado && (
-                        <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 font-(family-name:--font-jetbrains) text-[11px] font-bold tracking-wider text-[#d4860a] uppercase">
+                        <span className="rounded border border-[rgba(212,134,10,0.3)] bg-[rgba(212,134,10,0.1)] px-1.5 py-0.5 text-[11px] font-bold tracking-wider text-[#d4860a] uppercase">
                           Ajustado
                         </span>
                       )}
@@ -608,7 +608,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                 <div className="rounded border border-[#dde3ec] bg-[#f9fafb] p-5">
                   <div className="mb-3.5 flex items-center justify-between">
                     <div>
-                      <div className="font-(family-name:--font-barlow-condensed) text-base font-bold text-[#0f2137]">
+                      <div className=" text-base font-bold text-[#0f2137]">
                         {granInstalada?.nombre_granalla ?? "Granalla"}
                       </div>
                       <div className="mt-0.5 text-[13px] text-[#566778]">
@@ -651,7 +651,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                         key={g.malla}
                         className="grid grid-cols-[60px_1fr_1fr_44px_44px_52px] items-center gap-2 border-b border-[#dde3ec] py-1.5 last:border-b-0"
                       >
-                        <span className="font-(family-name:--font-jetbrains) text-xs font-semibold text-[#1a3a5c]">
+                        <span className=" text-xs font-semibold text-[#1a3a5c]">
                           {g.malla}
                         </span>
                         <div className="h-1.75 overflow-hidden rounded-sm bg-[#c8d4e3]">
@@ -666,14 +666,14 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                             style={{ width: `${realW}%`, background: realColor }}
                           />
                         </div>
-                        <span className="text-right font-(family-name:--font-jetbrains) text-xs font-semibold text-[#5a6e82]">
+                        <span className="text-right text-xs font-semibold text-[#5a6e82]">
                           {(g.idealPct * 100).toFixed(0)}%
                         </span>
-                        <span className="text-right font-(family-name:--font-jetbrains) text-xs font-semibold text-[#1a3a5c]">
+                        <span className="text-right text-xs font-semibold text-[#1a3a5c]">
                           {(g.realPct * 100).toFixed(0)}%
                         </span>
                         <span
-                          className={`text-right font-(family-name:--font-jetbrains) text-xs font-semibold ${diffClass}`}
+                          className={`text-right text-xs font-semibold ${diffClass}`}
                         >
                           {diffSign}
                           {(g.diff * 100).toFixed(1)}%
@@ -692,7 +692,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                     <div className="text-[12px] tracking-widest text-[#566778] uppercase">
                       Stock Granalla
                     </div>
-                    <div className="mt-1 font-(family-name:--font-barlow-condensed) text-[26px] font-bold text-[#0f2137]">
+                    <div className="mt-1 text-[26px] font-bold text-[#0f2137]">
                       {fmtNum(Math.round(stockTotal))}{" "}
                       <span className="text-xs font-light text-[#566778]">
                         kg
@@ -715,7 +715,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
                           Performance de Grano
                         </div>
                         <div className="mt-1 flex items-baseline gap-1.5">
-                          <span className="font-(family-name:--font-jetbrains) text-xl text-[#d4860a]">
+                          <span className=" text-xl text-[#d4860a]">
                             {Number(performance.porcentaje_real ?? 0).toFixed(0)}%
                           </span>
                           <span className="text-[13px] text-[#566778]">
@@ -777,7 +777,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
           DOOBLE In-Plant Support · Reporte generado automáticamente desde base
           de datos
         </div>
-        <div className="font-(family-name:--font-jetbrains) text-[12px] text-[#6b7c8b]">
+        <div className=" text-[12px] text-[#6b7c8b]">
           {numReporte} · {fmtDate(visita.fecha_visita)}
         </div>
       </div>
@@ -845,11 +845,11 @@ function ReportesLista() {
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
           <Link
             href="/home"
-            className="font-(family-name:--font-barlow-condensed) text-base font-black tracking-wider text-[#0f2137]"
+            className=" text-base font-black tracking-wider text-[#0f2137]"
           >
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
           </Link>
-          <span className="font-(family-name:--font-barlow-condensed) text-sm font-semibold tracking-wide text-[#566778] uppercase">
+          <span className=" text-sm font-semibold tracking-wide text-[#566778] uppercase">
             Reportes de Visita
           </span>
           <div className="flex-1" />
@@ -952,7 +952,7 @@ function ReportesLista() {
 
                   {/* Máquina / Cliente */}
                   <div>
-                    <div className="font-(family-name:--font-barlow-condensed) text-[14px] font-bold text-[#0f2137]">
+                    <div className=" text-[14px] font-bold text-[#0f2137]">
                       {maquina?.maquina_por_cliente ??
                         maquina?.tipo_maquina ??
                         "—"}
@@ -973,12 +973,12 @@ function ReportesLista() {
                   </div>
 
                   {/* Reporte # */}
-                  <div className="font-(family-name:--font-jetbrains) text-[14px] font-semibold text-[#1a5fa8]">
+                  <div className=" text-[14px] font-semibold text-[#1a5fa8]">
                     {numReporte}
                   </div>
 
                   {/* Horómetro */}
-                  <div className="font-(family-name:--font-jetbrains) text-[14px] text-[#3d4f63]">
+                  <div className=" text-[14px] text-[#3d4f63]">
                     {fmtNum(v.horometro_lectura)} hr
                   </div>
 
