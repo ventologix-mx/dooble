@@ -670,33 +670,24 @@ export default function FormularioVisitaPage() {
                   <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">
                     Fecha de Visita
                   </label>
-                  <input
-                    type="text"
-                    value={fechaDisplay}
-                    placeholder="DD/MM/AAAA"
-                    maxLength={10}
-                    onChange={(e) => {
-                      // Auto-insert slashes as user types digits
-                      const raw = e.target.value.replace(/\D/g, "").slice(0, 8);
-                      let formatted = raw;
-                      if (raw.length > 4)
-                        formatted = `${raw.slice(0, 2)}/${raw.slice(2, 4)}/${raw.slice(4)}`;
-                      else if (raw.length > 2)
-                        formatted = `${raw.slice(0, 2)}/${raw.slice(2)}`;
-                      setFechaDisplay(formatted);
-                      // Parse to YYYY-MM-DD once complete
-                      if (raw.length === 8) {
-                        const d = raw.slice(0, 2),
-                          m = raw.slice(2, 4),
-                          y = raw.slice(4, 8);
-                        setFecha(`${y}-${m}-${d}`);
+                  <div className="relative">
+                    <input
+                      readOnly
+                      value={
+                        fecha
+                          ? `${fecha.split("-")[2]}-${fecha.split("-")[1]}-${fecha.split("-")[0]}`
+                          : ""
                       }
-                    }}
-                    className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] text-[#0f2137] transition-colors outline-none focus:border-[#1a5fa8] focus:bg-white"
-                  />
-                  <span className="text-[12px] text-[#6b7c8b]">
-                    Puedes ajustar si estás llenando en oficina
-                  </span>
+                      placeholder="DD-MM-AAAA"
+                      className="w-full rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] text-[#0f2137] transition-colors outline-none focus:border-[#1a5fa8] focus:bg-white"
+                    />
+                    <input
+                      type="date"
+                      value={fecha}
+                      onChange={(e) => setFecha(e.target.value)}
+                      className="absolute inset-0 cursor-pointer opacity-0"
+                    />
+                  </div>
                 </div>
               </div>
 
