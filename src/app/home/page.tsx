@@ -66,10 +66,10 @@ export default function HomePage() {
           <div className="flex-1" />
           {user && (
             <div className="flex items-center gap-4">
-              <span className="text-xs text-[#566778]">{user.email}</span>
+              <span className="text-sm text-[#566778]">{user.email}</span>
               <a
                 href="/auth/logout"
-                className="rounded border border-[#dde3ec] px-3 py-1.5 text-xs font-semibold text-[#566778] transition-colors hover:border-[#d63b3b] hover:text-[#d63b3b]"
+                className="rounded border border-[#dde3ec] px-3 py-2 text-sm font-semibold text-[#566778] transition-colors hover:border-[#d63b3b] hover:text-[#d63b3b]"
               >
                 Cerrar Sesión
               </a>
@@ -84,7 +84,7 @@ export default function HomePage() {
           <h2 className=" text-3xl font-bold text-[#0f2137]">
             Bienvenido{user?.name ? `, ${user.name}` : ""}
           </h2>
-          <p className="mt-2 text-sm text-[#566778]">
+          <p className="mt-2 text-base text-[#566778]">
             Selecciona una opción para continuar
           </p>
         </div>
@@ -104,7 +104,7 @@ export default function HomePage() {
               <p className="mt-2 text-sm leading-relaxed text-[#566778]">
                 {route.description}
               </p>
-              <div className="mt-6 flex items-center gap-2 text-xs font-semibold tracking-wide text-[#1a5fa8] uppercase">
+              <div className="mt-6 inline-flex items-center gap-2 rounded-md border border-[#dde3ec] px-4 py-2 text-sm font-semibold tracking-wide text-[#1a5fa8] transition-colors group-hover:border-[#1a5fa8] group-hover:bg-[#f0f5ff]">
                 Abrir
                 <svg
                   className="h-4 w-4 transition-transform group-hover:translate-x-1"

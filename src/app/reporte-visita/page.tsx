@@ -71,13 +71,21 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
 
   if (error || !data) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-[#566778]">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 text-[#566778]">
         <div className="text-lg font-semibold text-[#d63b3b]">
           Reporte no encontrado
         </div>
-        <Link href="/home" className="text-sm text-[#1a5fa8] underline">
-          Volver al inicio
-        </Link>
+        <div className="flex gap-3">
+          <Link href="/reporte-visita" className="flex items-center gap-1.5 rounded-md border border-[#dde3ec] bg-white px-5 py-2.5 text-sm font-semibold text-[#3d4f63] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8]">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Ver Reportes
+          </Link>
+          <Link href="/home" className="flex items-center gap-1.5 rounded-md bg-[#1a5fa8] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#134a87]">
+            Ir al Inicio
+          </Link>
+        </div>
       </div>
     );
   }
@@ -236,11 +244,21 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
         <div className="mx-auto grid max-w-300 grid-cols-[auto_1fr_auto] items-stretch">
-          {/* Logo */}
+          {/* Logo + back */}
           <div className="flex items-center gap-3 border-r border-[#dde3ec] px-6 py-3.5">
             <Link
+              href="/reporte-visita"
+              className="flex items-center gap-1.5 rounded border border-[#dde3ec] px-3 py-1.5 text-sm font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8]"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Lista
+            </Link>
+            <span className="h-4 w-px bg-[#dde3ec]" />
+            <Link
               href="/home"
-              className=" text-[17px] font-black tracking-wider text-[#0f2137]"
+              className=" text-[17px] font-black tracking-wider text-[#0f2137] hover:text-[#1a5fa8] transition-colors"
             >
               DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
             </Link>
@@ -845,19 +863,29 @@ function ReportesLista() {
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
           <Link
             href="/home"
-            className=" text-base font-black tracking-wider text-[#0f2137]"
+            className="flex items-center gap-1.5 rounded border border-[#dde3ec] px-3 py-1.5 text-sm font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8]"
           >
-            DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Inicio
           </Link>
+          <span className="h-4 w-px bg-[#dde3ec]" />
+          <span className=" text-base font-black tracking-wider text-[#0f2137]">
+            DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
+          </span>
           <span className=" text-sm font-semibold tracking-wide text-[#566778] uppercase">
             Reportes de Visita
           </span>
           <div className="flex-1" />
           <Link
             href="/formulario-visita"
-            className="rounded-md bg-[#1a5fa8] px-4 py-2 text-xs font-semibold text-white hover:bg-[#134a87]"
+            className="flex items-center gap-1.5 rounded-md bg-[#1a5fa8] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#134a87]"
           >
-            + Nueva Visita
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Nueva Visita
           </Link>
         </div>
       </header>
@@ -943,7 +971,7 @@ function ReportesLista() {
                   onClick={() =>
                     router.push(`/reporte-visita?id=${v.id_visita}`)
                   }
-                  className="grid w-full grid-cols-[auto_2fr_2fr_1fr_1fr_auto] items-center gap-4 border-b border-[#dde3ec] px-5 py-3.5 text-left transition-colors last:border-0 hover:bg-[#f9fafb]"
+                  className="group grid w-full grid-cols-[auto_2fr_2fr_1fr_1fr_auto] items-center gap-4 border-b border-[#dde3ec] px-5 py-3.5 text-left transition-colors last:border-0 hover:bg-[#f9fafb]"
                 >
                   {/* Estado dot */}
                   <div
@@ -983,9 +1011,9 @@ function ReportesLista() {
                   </div>
 
                   {/* CTA */}
-                  <div className="flex items-center gap-1 text-[13px] font-semibold text-[#1a5fa8]">
+                  <div className="flex items-center gap-1.5 rounded border border-[#dde3ec] px-3 py-1.5 text-sm font-semibold text-[#1a5fa8] transition-colors group-hover:border-[#1a5fa8] group-hover:bg-[#f0f5ff]">
                     Ver
-                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>

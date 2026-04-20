@@ -431,15 +431,22 @@ export default function FormularioVisitaPage() {
         <div className="mx-auto flex max-w-240 items-center gap-4 px-6 py-3">
           <Link
             href="/home"
-            className=" text-base font-black tracking-wider text-[#0f2137]"
+            className="flex items-center gap-1.5 rounded border border-[#dde3ec] px-3 py-1.5 text-sm font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8]"
           >
-            DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Inicio
           </Link>
+          <span className="h-4 w-px bg-[#dde3ec]" />
+          <span className="text-base font-black tracking-wider text-[#0f2137]">
+            DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
+          </span>
           <span className=" text-sm font-semibold tracking-wide text-[#566778] uppercase">
             Nueva Visita Técnica
           </span>
           <div className="flex-1" />
-          <span className=" text-xs text-[#566778]">
+          <span className=" text-sm text-[#566778]">
             Paso <span className="font-semibold text-[#1a5fa8]">{step}</span> de 4
           </span>
         </div>
@@ -469,7 +476,7 @@ export default function FormularioVisitaPage() {
               <div className={`relative z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 text-[13px] font-semibold transition-all ${isActive ? "border-[#1a5fa8] bg-[#1a5fa8] text-white" : isDone ? "border-[#1a9e5c] bg-[#1a9e5c] text-white" : "border-[#dde3ec] bg-white text-[#6b7c8b]"}`}>
                 {isDone ? "✓" : n}
               </div>
-              <span className={`text-[12px] font-semibold tracking-wider uppercase ${isActive ? "text-[#1a5fa8]" : isDone ? "text-[#1a9e5c]" : "text-[#6b7c8b]"}`}>
+              <span className={`text-[13px] font-semibold tracking-wider uppercase ${isActive ? "text-[#1a5fa8]" : isDone ? "text-[#1a9e5c]" : "text-[#6b7c8b]"}`}>
                 {label}
               </span>
             </button>
@@ -1101,20 +1108,41 @@ export default function FormularioVisitaPage() {
               <>Selecciona un cliente para comenzar</>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2.5">
             {step > 1 && (
-              <button onClick={() => goToStep(step - 1)} disabled={isSaving} className="rounded-md border border-[#dde3ec] bg-white px-4 py-2 text-xs font-semibold text-[#3d4f63] hover:bg-[#f4f6f9] disabled:opacity-50">
-                ← Atrás
+              <button onClick={() => goToStep(step - 1)} disabled={isSaving} className="flex items-center gap-1.5 rounded-md border border-[#dde3ec] bg-white px-5 py-2.5 text-sm font-semibold text-[#3d4f63] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8] disabled:opacity-50">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Atrás
               </button>
             )}
             {step < 4 && (
-              <button onClick={() => goToStep(step + 1)} disabled={!clienteId} className="rounded-md bg-[#1a5fa8] px-5 py-2 text-xs font-semibold text-white hover:bg-[#134a87] disabled:opacity-40">
-                Continuar →
+              <button onClick={() => goToStep(step + 1)} disabled={!clienteId} className="flex items-center gap-1.5 rounded-md bg-[#1a5fa8] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#134a87] disabled:opacity-40">
+                Continuar
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </button>
             )}
             {step === 4 && (
-              <button onClick={saveVisita} disabled={isSaving || !clienteId} className="rounded-md bg-[#1a9e5c] px-5 py-2 text-xs font-semibold text-white hover:bg-[#137a47] disabled:opacity-50">
-                {isSaving ? "Guardando…" : "Guardar y Generar Reportes"}
+              <button onClick={saveVisita} disabled={isSaving || !clienteId} className="flex items-center gap-2 rounded-md bg-[#1a9e5c] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#137a47] disabled:opacity-50">
+                {isSaving ? (
+                  <>
+                    <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Guardando…
+                  </>
+                ) : (
+                  <>
+                    Guardar y Generar Reportes
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </>
+                )}
               </button>
             )}
           </div>
