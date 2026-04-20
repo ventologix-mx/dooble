@@ -51,9 +51,9 @@ const routes = [
     iconColor: "text-[#1a9e5c]",
   },
   {
-    title: "Reporte Granallado Diario",
+    title: "Reporte AMP",
     description:
-      "Ver el reporte diario de granallado por cliente. Analiza variación de amperajes, tiempos efectivos y consumo eléctrico por turbina.",
+      "Ver el reporte AMP por cliente. Analiza variación de amperajes, tiempos efectivos y consumo eléctrico por turbina.",
     href: "/reporte-granallado",
     icon: (
       <svg
@@ -83,7 +83,7 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
-          <h1 className=" text-base font-black tracking-wider text-[#0f2137]">
+          <h1 className="text-base font-black tracking-wider text-[#0f2137]">
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
           </h1>
           <div className="flex-1" />
@@ -104,7 +104,7 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="mx-auto max-w-5xl px-6 py-12">
         <div className="mb-10">
-          <h2 className=" text-3xl font-bold text-[#0f2137]">
+          <h2 className="text-3xl font-bold text-[#0f2137]">
             Bienvenido{user?.name ? `, ${user.name}` : ""}
           </h2>
           <p className="mt-2 text-base text-[#566778]">
@@ -121,7 +121,7 @@ export default function HomePage() {
               className={`group rounded-lg border border-t-[3px] border-[#dde3ec] ${route.color} bg-white p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md`}
             >
               <div className={`mb-4 ${route.iconColor}`}>{route.icon}</div>
-              <h3 className=" text-xl font-bold text-[#0f2137] group-hover:text-[#1a5fa8]">
+              <h3 className="text-xl font-bold text-[#0f2137] group-hover:text-[#1a5fa8]">
                 {route.title}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-[#566778]">
