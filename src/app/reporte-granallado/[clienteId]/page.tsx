@@ -142,21 +142,21 @@ CLIENT_DATA["aceros-del-norte"] = {
   hoy: { kwh: 384.5, ampMedio: 9.1, horometro: 11.2, granalla: 38 },
   mes: { kwh: 1560.2, ampMedio: 8.8, horometro: 52.4, granalla: 178 },
 };
-CLIENT_DATA["metalsa"] = {
+CLIENT_DATA.metalsa = {
   ...BASE_REPORT,
   cliente: "Metalsa Ramos Arizpe",
   maq: { ...BASE_REPORT.maq, nombre: "Granalladora #3 Chasis", codigo: "2449780", turbinas: 8, voltaje: 480, producto: "Chasis Automotriz", ampMax: 24, ampIdeal: 20, potencia: 120.0 },
   hoy: { kwh: 2180.4, ampMedio: 17.3, horometro: 22.1, granalla: 142 },
   mes: { kwh: 8640.0, ampMedio: 16.9, horometro: 98.3, granalla: 648 },
 };
-CLIENT_DATA["vitro"] = {
+CLIENT_DATA.vitro = {
   ...BASE_REPORT,
   cliente: "Vitro Packaging",
   maq: { ...BASE_REPORT.maq, nombre: "Granalladora #1 Moldes", codigo: "2448620", turbinas: 4, voltaje: 460, producto: "Moldes de Vidrio", abrasivo: "S-330", ampMax: 19, ampIdeal: 15, potencia: 42.0 },
   hoy: { kwh: 720.9, ampMedio: 11.8, horometro: 14.6, granalla: 52 },
   mes: { kwh: 2980.4, ampMedio: 10.9, horometro: 68.1, granalla: 240 },
 };
-CLIENT_DATA["nemak"] = {
+CLIENT_DATA.nemak = {
   ...BASE_REPORT,
   cliente: "Nemak Monterrey",
   maq: { ...BASE_REPORT.maq, nombre: "Granalladora #2 Aluminio", codigo: "2447310", turbinas: 4, voltaje: 460, producto: "Cabezas de Aluminio", abrasivo: "IMPAKT-INOX 10", ampMax: 21, ampIdeal: 17, potencia: 52.0 },
