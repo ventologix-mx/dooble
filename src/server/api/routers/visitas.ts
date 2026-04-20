@@ -156,7 +156,7 @@ export const visitasRouter = createTRPCRouter({
     .input(
       z
         .object({
-          limit: z.number().min(1).max(100).default(20),
+          limit: z.number().min(1).max(500).default(20),
           id_cliente: z.number().optional(),
         })
         .optional(),
@@ -166,7 +166,7 @@ export const visitasRouter = createTRPCRouter({
         where: input?.id_cliente
           ? { maquinas_maestra: { id_cliente: input.id_cliente } }
           : undefined,
-        orderBy: { fecha_visita: "desc" },
+        orderBy: [{ fecha_visita: "desc" }, { id_visita: "desc" }],
         take: input?.limit ?? 20,
         select: {
           id_visita: true,

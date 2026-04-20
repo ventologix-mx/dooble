@@ -824,10 +824,12 @@ function ReportesLista() {
   const [clienteId, setClienteId] = useState<number | null>(null);
   const [sortField, setSortField] = useState<SortField>("fecha");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const { data: clientes = [], isFetching: fetchingClientes } = api.clientes.list.useQuery();
   const { data: visitas = [], isLoading, isFetching: fetchingVisitas } = api.visitas.listRecientes.useQuery(
-    { limit: 100, id_cliente: clienteId ?? undefined },
+    { limit: 500, id_cliente: clienteId ?? undefined },
   );
 
   const toggleSort = (field: SortField) => {
@@ -837,27 +839,33 @@ function ReportesLista() {
       setSortField(field);
       setSortDir("desc");
     }
+    setPage(1);
   };
 
   const sortedVisitas = [...visitas].sort((a, b) => {
     let cmp = 0;
     if (sortField === "fecha") {
-      cmp = new Date(a.fecha_visita ?? 0).getTime() - new Date(b.fecha_visita ?? 0).getTime();
+      const ta = a.fecha_visita ? new Date(a.fecha_visita).getTime() : -Infinity;
+      const tb = b.fecha_visita ? new Date(b.fecha_visita).getTime() : -Infinity;
+      cmp = ta - tb;
     } else {
       cmp = (a.consecutivo_reporte ?? 0) - (b.consecutivo_reporte ?? 0);
     }
     return sortDir === "asc" ? cmp : -cmp;
   });
 
+  const totalPages = Math.max(1, Math.ceil(sortedVisitas.length / pageSize));
+  const pagedVisitas = sortedVisitas.slice((page - 1) * pageSize, page * pageSize);
+
   const SortIcon = ({ field }: { field: SortField }) =>
     sortField !== field ? (
-      <span className="text-[#dde3ec]">↕</span>
+      <span className="text-[#c8d4e3]">↕</span>
     ) : (
       <span className="text-[#1a5fa8]">{sortDir === "asc" ? "↑" : "↓"}</span>
     );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#f4f6f9]">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
@@ -871,10 +879,10 @@ function ReportesLista() {
             Inicio
           </Link>
           <span className="h-4 w-px bg-[#dde3ec]" />
-          <span className=" text-base font-black tracking-wider text-[#0f2137]">
+          <span className="text-base font-black tracking-wider text-[#0f2137]">
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
           </span>
-          <span className=" text-sm font-semibold tracking-wide text-[#566778] uppercase">
+          <span className="text-sm font-semibold tracking-wide text-[#566778] uppercase">
             Reportes de Visita
           </span>
           <div className="flex-1" />
@@ -891,17 +899,18 @@ function ReportesLista() {
       </header>
 
       <div className="mx-auto max-w-5xl px-6 py-8">
-        {/* Filtro */}
-        <div className="mb-6 flex items-center gap-3">
+        {/* Toolbar */}
+        <div className="mb-5 flex flex-wrap items-center gap-3">
           <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">
             Cliente
           </label>
           <select
             value={clienteId ?? ""}
-            onChange={(e) =>
-              setClienteId(e.target.value ? parseInt(e.target.value) : null)
-            }
-            className="rounded border border-[#dde3ec] bg-[#f4f6f9] px-3 py-2 text-[15px] text-[#0f2137] outline-none focus:border-[#1a5fa8] focus:bg-white"
+            onChange={(e) => {
+              setClienteId(e.target.value ? parseInt(e.target.value) : null);
+              setPage(1);
+            }}
+            className="rounded border border-[#dde3ec] bg-white px-3 py-2 text-[15px] text-[#0f2137] shadow-sm outline-none focus:border-[#1a5fa8]"
           >
             <option value="">Todos los clientes</option>
             {clientes.map((c) => (
@@ -912,15 +921,31 @@ function ReportesLista() {
           </select>
           {clienteId && (
             <button
-              onClick={() => setClienteId(null)}
+              onClick={() => { setClienteId(null); setPage(1); }}
               className="text-xs text-[#566778] underline hover:text-[#d63b3b]"
             >
               Limpiar
             </button>
           )}
-          <span className="ml-auto text-xs text-[#6b7c8b]">
-            {sortedVisitas.length} reporte{sortedVisitas.length !== 1 ? "s" : ""}
-          </span>
+
+          <div className="ml-auto flex items-center gap-3">
+            <span className="text-[13px] text-[#6b7c8b]">
+              {sortedVisitas.length} reporte{sortedVisitas.length !== 1 ? "s" : ""}
+            </span>
+            <span className="h-4 w-px bg-[#dde3ec]" />
+            <label className="text-[13px] font-semibold tracking-wider text-[#566778] uppercase">
+              Por página
+            </label>
+            <select
+              value={pageSize}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+              className="rounded border border-[#dde3ec] bg-white px-3 py-2 text-[14px] text-[#0f2137] shadow-sm outline-none focus:border-[#1a5fa8]"
+            >
+              {[10, 25, 50, 100].map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Lista */}
@@ -933,94 +958,157 @@ function ReportesLista() {
             No hay reportes registrados.
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-[#dde3ec] bg-white">
-            {/* Header tabla */}
-            <div className="grid grid-cols-[auto_2fr_2fr_1fr_1fr_auto] items-center gap-4 border-b border-[#dde3ec] bg-[#f4f6f9] px-5 py-2.5 text-[12px] font-bold tracking-wider text-[#566778] uppercase">
-              <span className="w-4" />
-              <span>Máquina / Cliente</span>
-              <button
-                onClick={() => toggleSort("fecha")}
-                className="flex items-center gap-1 hover:text-[#1a5fa8] transition-colors"
-              >
-                Fecha <SortIcon field="fecha" />
-              </button>
-              <button
-                onClick={() => toggleSort("numero")}
-                className="flex items-center gap-1 hover:text-[#1a5fa8] transition-colors"
-              >
-                Reporte # <SortIcon field="numero" />
-              </button>
-              <span>Horómetro</span>
-              <span />
-            </div>
-
-            {sortedVisitas.map((v) => {
-              const maquina = v.maquinas_maestra;
-              const cliente = maquina?.clientes;
-              const numReporte =
-                maquina?.maquina_por_cliente && v.consecutivo_reporte
-                  ? `${v.numero_maquina_inf ?? maquina.maquina_por_cliente}-${String(v.consecutivo_reporte).padStart(4, "0")}`
-                  : `V-${String(v.id_visita).padStart(4, "0")}`;
-              const estadoInfo =
-                ESTADO_LABEL[v.evaluacion_estado ?? "BUENAS_CONDICIONES"] ??
-                ESTADO_LABEL.BUENAS_CONDICIONES!;
-
-              return (
+          <>
+            <div className="overflow-hidden rounded-xl border border-[#dde3ec] bg-white shadow-sm">
+              {/* Header tabla */}
+              <div className="grid grid-cols-[3fr_2fr_1.4fr_1.4fr_auto] items-center gap-6 border-b-2 border-[#dde3ec] bg-[#f4f6f9] px-6 py-3 text-[11px] font-bold tracking-widest text-[#566778] uppercase">
+                <span>Máquina / Cliente</span>
                 <button
-                  key={v.id_visita}
-                  onClick={() =>
-                    router.push(`/reporte-visita?id=${v.id_visita}`)
-                  }
-                  className="group grid w-full grid-cols-[auto_2fr_2fr_1fr_1fr_auto] items-center gap-4 border-b border-[#dde3ec] px-5 py-3.5 text-left transition-colors last:border-0 hover:bg-[#f9fafb]"
+                  onClick={() => toggleSort("fecha")}
+                  className="flex items-center gap-1.5 transition-colors hover:text-[#1a5fa8]"
                 >
-                  {/* Estado dot */}
-                  <div
-                    className={`h-2.5 w-2.5 rounded-full ${estadoInfo.dot}`}
-                  />
+                  Fecha <SortIcon field="fecha" />
+                </button>
+                <button
+                  onClick={() => toggleSort("numero")}
+                  className="flex items-center gap-1.5 transition-colors hover:text-[#1a5fa8]"
+                >
+                  Reporte # <SortIcon field="numero" />
+                </button>
+                <span>Horómetro</span>
+                <span />
+              </div>
 
-                  {/* Máquina / Cliente */}
-                  <div>
-                    <div className=" text-[14px] font-bold text-[#0f2137]">
-                      {maquina?.maquina_por_cliente ??
-                        maquina?.tipo_maquina ??
-                        "—"}
-                    </div>
-                    <div className="text-[13px] text-[#566778]">
-                      {cliente?.nombre ?? "—"}
-                    </div>
-                  </div>
+              {pagedVisitas.map((v) => {
+                const maquina = v.maquinas_maestra;
+                const cliente = maquina?.clientes;
+                const numReporte =
+                  maquina?.maquina_por_cliente && v.consecutivo_reporte
+                    ? `${v.numero_maquina_inf ?? maquina.maquina_por_cliente}-${String(v.consecutivo_reporte).padStart(4, "0")}`
+                    : `V-${String(v.id_visita).padStart(4, "0")}`;
+                const estadoInfo =
+                  ESTADO_LABEL[v.evaluacion_estado ?? "BUENAS_CONDICIONES"] ??
+                  ESTADO_LABEL.BUENAS_CONDICIONES!;
 
-                  {/* Fecha */}
-                  <div>
-                    <div className="text-[15px] text-[#3d4f63]">
+                return (
+                  <button
+                    key={v.id_visita}
+                    onClick={() => router.push(`/reporte-visita?id=${v.id_visita}`)}
+                    className="group grid w-full grid-cols-[3fr_2fr_1.4fr_1.4fr_auto] items-center gap-6 border-b border-[#eef1f6] px-6 py-5 text-left transition-colors last:border-0 hover:bg-[#f7f9fc]"
+                  >
+                    {/* Máquina / Cliente + estado badge */}
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-1 h-3 w-3 flex-shrink-0 rounded-full ${estadoInfo.dot}`} />
+                      <div>
+                        <div className="text-[16px] font-bold leading-tight text-[#0f2137]">
+                          {maquina?.maquina_por_cliente ?? maquina?.tipo_maquina ?? "—"}
+                        </div>
+                        <div className="mt-1 text-[14px] text-[#566778]">
+                          {cliente?.nombre ?? "—"}
+                        </div>
+                        <span className={`mt-1.5 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wide ${estadoInfo.color} bg-[#f4f6f9]`}>
+                          {estadoInfo.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Fecha */}
+                    <div className="text-[16px] font-medium text-[#3d4f63]">
                       {fmtDate(v.fecha_visita)}
                     </div>
-                    <div className={`mt-0.5 text-[12px] font-semibold ${estadoInfo.color}`}>
-                      {estadoInfo.label}
+
+                    {/* Reporte # */}
+                    <div className="text-[15px] font-bold text-[#1a5fa8]">
+                      {numReporte}
                     </div>
-                  </div>
 
-                  {/* Reporte # */}
-                  <div className=" text-[14px] font-semibold text-[#1a5fa8]">
-                    {numReporte}
-                  </div>
+                    {/* Horómetro */}
+                    <div>
+                      <div className="text-[17px] font-semibold text-[#0f2137]">
+                        {fmtNum(v.horometro_lectura)}
+                      </div>
+                      <div className="text-[12px] tracking-wider text-[#8a9bac] uppercase">hr</div>
+                    </div>
 
-                  {/* Horómetro */}
-                  <div className=" text-[14px] text-[#3d4f63]">
-                    {fmtNum(v.horometro_lectura)} hr
-                  </div>
+                    {/* CTA */}
+                    <div className="flex items-center gap-1.5 rounded-lg border border-[#dde3ec] px-4 py-2.5 text-[14px] font-semibold text-[#1a5fa8] transition-colors group-hover:border-[#1a5fa8] group-hover:bg-[#eef4ff]">
+                      Ver
+                      <svg className="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
 
-                  {/* CTA */}
-                  <div className="flex items-center gap-1.5 rounded border border-[#dde3ec] px-3 py-1.5 text-sm font-semibold text-[#1a5fa8] transition-colors group-hover:border-[#1a5fa8] group-hover:bg-[#f0f5ff]">
-                    Ver
-                    <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-5 flex items-center justify-between">
+                <span className="text-[13px] text-[#6b7c8b]">
+                  Página {page} de {totalPages} · {sortedVisitas.length} reportes
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setPage(1)}
+                    disabled={page === 1}
+                    className="rounded border border-[#dde3ec] bg-white px-3 py-2 text-[13px] font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    «
+                  </button>
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="rounded border border-[#dde3ec] bg-white px-4 py-2 text-[13px] font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Anterior
+                  </button>
+
+                  {/* Page number pills */}
+                  {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
+                    let p: number;
+                    if (totalPages <= 7) {
+                      p = i + 1;
+                    } else if (page <= 4) {
+                      p = i + 1;
+                    } else if (page >= totalPages - 3) {
+                      p = totalPages - 6 + i;
+                    } else {
+                      p = page - 3 + i;
+                    }
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`rounded border px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+                          p === page
+                            ? "border-[#1a5fa8] bg-[#1a5fa8] text-white"
+                            : "border-[#dde3ec] bg-white text-[#566778] hover:border-[#1a5fa8] hover:text-[#1a5fa8]"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="rounded border border-[#dde3ec] bg-white px-4 py-2 text-[13px] font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Siguiente
+                  </button>
+                  <button
+                    onClick={() => setPage(totalPages)}
+                    disabled={page === totalPages}
+                    className="rounded border border-[#dde3ec] bg-white px-3 py-2 text-[13px] font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    »
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 

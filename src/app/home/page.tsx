@@ -50,6 +50,29 @@ const routes = [
     color: "border-t-[#1a9e5c]",
     iconColor: "text-[#1a9e5c]",
   },
+  {
+    title: "Reporte Granallado Diario",
+    description:
+      "Ver el reporte diario de granallado por cliente. Analiza variación de amperajes, tiempos efectivos y consumo eléctrico por turbina.",
+    href: "/reporte-granallado",
+    icon: (
+      <svg
+        className="h-8 w-8"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M13 10V3L4 14h7v7l9-11h-7z"
+        />
+      </svg>
+    ),
+    color: "border-t-[#d4860a]",
+    iconColor: "text-[#d4860a]",
+  },
 ];
 
 export default function HomePage() {
