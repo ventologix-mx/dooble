@@ -117,7 +117,7 @@ export default function ReporteGranalladoPage() {
   return (
     <div className="min-h-screen bg-[#eef1f6]">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b-[3px] border-[#d4860a] bg-white shadow-[0_2px_12px_rgba(212,134,10,0.08)]">
+      <header className="border-b-[3px] border-[#d4860a] bg-white shadow-[0_2px_12px_rgba(212,134,10,0.08)]">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
           <Link href="/home" className="text-base font-black tracking-wider text-[#0f2137] hover:text-[#1a5fa8]">
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX

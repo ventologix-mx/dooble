@@ -242,7 +242,7 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
+      <header className="border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
         <div className="mx-auto grid max-w-300 grid-cols-[auto_1fr_auto] items-stretch">
           {/* Logo + back */}
           <div className="flex items-center gap-3 border-r border-[#dde3ec] px-6 py-3.5">
@@ -867,7 +867,7 @@ function ReportesLista() {
   return (
     <div className="min-h-screen bg-[#f4f6f9]">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
+      <header className="border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
           <Link
             href="/home"
