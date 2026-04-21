@@ -119,11 +119,16 @@ export default function ReporteGranalladoPage() {
       {/* Header */}
       <header className="border-b-[3px] border-[#d4860a] bg-white shadow-[0_2px_12px_rgba(212,134,10,0.08)]">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
-          <Link href="/home" className="text-base font-black tracking-wider text-[#0f2137] hover:text-[#1a5fa8]">
+          <Link
+            href="/home"
+            className="text-base font-black tracking-wider text-[#0f2137] hover:text-[#1a5fa8]"
+          >
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
           </Link>
           <span className="text-[#dde3ec]">/</span>
-          <span className="text-sm font-semibold text-[#566778]">Reporte Granallado Diario</span>
+          <span className="text-sm font-semibold text-[#566778]">
+            Reporte Granallado Diario
+          </span>
           <div className="flex-1" />
           {user && (
             <div className="flex items-center gap-4">
@@ -144,16 +149,19 @@ export default function ReporteGranalladoPage() {
         {/* Title row */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-[#0f2137]">Seleccionar Cliente</h2>
+            <h2 className="text-2xl font-bold text-[#0f2137]">
+              Seleccionar Cliente
+            </h2>
             <p className="mt-1 text-sm text-[#566778]">
-              {filtered.length} cliente{filtered.length !== 1 ? "s" : ""} disponible{filtered.length !== 1 ? "s" : ""}
+              {filtered.length} cliente{filtered.length !== 1 ? "s" : ""}{" "}
+              disponible{filtered.length !== 1 ? "s" : ""}
             </p>
           </div>
 
           {/* Search */}
           <div className="relative w-full sm:w-72">
             <svg
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8898a8]"
+              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#8898a8]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -170,7 +178,7 @@ export default function ReporteGranalladoPage() {
               placeholder="Buscar cliente o máquina..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-[#dde3ec] bg-white py-2 pl-9 pr-4 text-sm text-[#3d4f63] placeholder:text-[#aab4c0] focus:border-[#d4860a] focus:outline-none focus:ring-2 focus:ring-[#d4860a]/20"
+              className="w-full rounded-lg border border-[#dde3ec] bg-white py-2 pr-4 pl-9 text-sm text-[#3d4f63] placeholder:text-[#aab4c0] focus:border-[#d4860a] focus:ring-2 focus:ring-[#d4860a]/20 focus:outline-none"
             />
           </div>
         </div>
@@ -178,10 +186,22 @@ export default function ReporteGranalladoPage() {
         {/* Client grid */}
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#dde3ec] bg-white py-20 text-center">
-            <svg className="mb-3 h-10 w-10 text-[#aab4c0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="mb-3 h-10 w-10 text-[#aab4c0]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
-            <p className="text-sm font-semibold text-[#8898a8]">Sin resultados para &ldquo;{search}&rdquo;</p>
+            <p className="text-sm font-semibold text-[#8898a8]">
+              Sin resultados para &ldquo;{search}&rdquo;
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -190,7 +210,7 @@ export default function ReporteGranalladoPage() {
               return (
                 <Link
                   key={c.id}
-                  href={`/reporte-granallado/${c.id}`}
+                  href={`/reporte-diario/${c.id}`}
                   className="group rounded-xl border border-[#dde3ec] bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#d4860a]/40 hover:shadow-md"
                 >
                   {/* Top row */}
@@ -199,9 +219,13 @@ export default function ReporteGranalladoPage() {
                       <h3 className="truncate text-[15px] font-bold text-[#0f2137] group-hover:text-[#d4860a]">
                         {c.nombre}
                       </h3>
-                      <p className="mt-0.5 truncate text-[12px] text-[#7a8898]">{c.maquina}</p>
+                      <p className="mt-0.5 truncate text-[12px] text-[#7a8898]">
+                        {c.maquina}
+                      </p>
                     </div>
-                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${st.badge}`}>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${st.badge}`}
+                    >
                       {st.label}
                     </span>
                   </div>
@@ -210,15 +234,21 @@ export default function ReporteGranalladoPage() {
                   <div className="mb-4 grid grid-cols-3 gap-2 rounded-lg bg-[#f5f7fa] p-3">
                     <div className="text-center">
                       <p className="text-[11px] text-[#8898a8]">Amp. Medio</p>
-                      <p className="text-[14px] font-bold text-[#0f2137]">{c.ampMedio}A</p>
+                      <p className="text-[14px] font-bold text-[#0f2137]">
+                        {c.ampMedio}A
+                      </p>
                     </div>
-                    <div className="text-center border-x border-[#dde3ec]">
+                    <div className="border-x border-[#dde3ec] text-center">
                       <p className="text-[11px] text-[#8898a8]">Horómetro</p>
-                      <p className="text-[14px] font-bold text-[#0f2137]">{c.horasEfectivas}h</p>
+                      <p className="text-[14px] font-bold text-[#0f2137]">
+                        {c.horasEfectivas}h
+                      </p>
                     </div>
                     <div className="text-center">
                       <p className="text-[11px] text-[#8898a8]">Consumo</p>
-                      <p className="text-[14px] font-bold text-[#0f2137]">{c.consumoKwh}</p>
+                      <p className="text-[14px] font-bold text-[#0f2137]">
+                        {c.consumoKwh}
+                      </p>
                       <p className="text-[10px] text-[#8898a8]">kWh</p>
                     </div>
                   </div>
@@ -226,9 +256,15 @@ export default function ReporteGranalladoPage() {
                   {/* Footer row */}
                   <div className="flex items-center justify-between text-[11px] text-[#8898a8]">
                     <span>
-                      <span className="font-semibold text-[#566778]">Código:</span> {c.codigo}
+                      <span className="font-semibold text-[#566778]">
+                        Código:
+                      </span>{" "}
+                      {c.codigo}
                       {" · "}
-                      <span className="font-semibold text-[#566778]">Turbinas:</span> {c.turbinas}
+                      <span className="font-semibold text-[#566778]">
+                        Turbinas:
+                      </span>{" "}
+                      {c.turbinas}
                     </span>
                     <span>{c.ultimaFecha}</span>
                   </div>
@@ -236,8 +272,18 @@ export default function ReporteGranalladoPage() {
                   {/* Arrow */}
                   <div className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-[#d4860a] opacity-0 transition-opacity group-hover:opacity-100">
                     Ver reporte
-                    <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                    <svg
+                      className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M9 5l7 7-7 7"
+                      />
                     </svg>
                   </div>
                 </Link>

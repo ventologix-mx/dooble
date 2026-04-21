@@ -690,7 +690,7 @@ export default function ReporteGranalladoDetalle() {
           Inicio
         </Link>
         <span>/</span>
-        <Link href="/reporte-granallado" className="hover:text-[#1a5fa8]">
+        <Link href="/reporte-diario" className="hover:text-[#1a5fa8]">
           Reporte Granallado
         </Link>
         <span>/</span>

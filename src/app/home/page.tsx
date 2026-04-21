@@ -54,7 +54,7 @@ const routes = [
     title: "Reporte AMP",
     description:
       "Ver el reporte AMP por cliente. Analiza variación de amperajes, tiempos efectivos y consumo eléctrico por turbina.",
-    href: "/reporte-granallado",
+    href: "/reporte-diario",
     icon: (
       <svg
         className="h-8 w-8"
