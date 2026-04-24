@@ -1,6 +1,13 @@
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure, superAdminProcedure } from "~/server/api/trpc";
 
 export const clientesRouter = createTRPCRouter({
+  listSimple: superAdminProcedure.query(async ({ ctx }) => {
+    return ctx.db.clientes.findMany({
+      orderBy: { nombre: "asc" },
+      select: { id_cliente: true, nombre: true, codigo: true },
+    });
+  }),
+
   list: publicProcedure.query(async ({ ctx }) => {
     const clientes = await ctx.db.clientes.findMany({
       orderBy: { nombre: "asc" },

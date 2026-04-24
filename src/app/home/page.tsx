@@ -2,8 +2,11 @@
 
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { api } from "~/trpc/react";
 
-const routes = [
+const ADMIN_ROUTES = [
   {
     title: "Formulario de Visita",
     description:
@@ -75,21 +78,115 @@ const routes = [
   },
 ];
 
+const CLIENT_ROUTES = [
+  {
+    title: "Reporte de Visita",
+    description:
+      "Consultar los reportes de tus visitas técnicas. Visualiza estado de máquinas, histórico KG/HR, granulometría y recomendaciones.",
+    href: "/reporte-visita",
+    icon: (
+      <svg
+        className="h-8 w-8"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+        />
+      </svg>
+    ),
+    color: "border-t-[#1a9e5c]",
+    iconColor: "text-[#1a9e5c]",
+  },
+  {
+    title: "Reporte AMP",
+    description:
+      "Ver el reporte AMP. Analiza variación de amperajes, tiempos efectivos y consumo eléctrico por turbina.",
+    href: "/reporte-diario",
+    icon: (
+      <svg
+        className="h-8 w-8"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M13 10V3L4 14h7v7l9-11h-7z"
+        />
+      </svg>
+    ),
+    color: "border-t-[#d4860a]",
+    iconColor: "text-[#d4860a]",
+  },
+];
+
 export default function HomePage() {
   const { user } = useUser();
+  const router = useRouter();
+  const { data: me, isLoading } = api.auth.getMe.useQuery();
+
+  useEffect(() => {
+    if (!isLoading && me === null) {
+      router.replace("/no-autorizado");
+    }
+  }, [isLoading, me, router]);
+
+  if (isLoading || me === undefined) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#eef1f6]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1a5fa8] border-t-transparent" />
+      </div>
+    );
+  }
+
+  const isSuperAdmin = me?.rol === "super_admin";
+  const routes = isSuperAdmin ? ADMIN_ROUTES : CLIENT_ROUTES;
+  const clienteNombre = me?.clientes?.nombre;
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <header className="border-b-[3px] border-[#1a5fa8] bg-white shadow-[0_2px_12px_rgba(26,95,168,0.08)]">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
           <h1 className="text-base font-black tracking-wider text-[#0f2137]">
             DOOBLE<span className="text-[#1a5fa8]">·</span>INOX
           </h1>
+          {isSuperAdmin && (
+            <span className="rounded bg-[#1a5fa8]/10 px-2 py-0.5 text-xs font-semibold tracking-widest text-[#1a5fa8] uppercase">
+              Admin
+            </span>
+          )}
           <div className="flex-1" />
           {user && (
             <div className="flex items-center gap-4">
               <span className="text-sm text-[#566778]">{user.email}</span>
+              {isSuperAdmin && (
+                <Link
+                  href="/admin/usuarios"
+                  className="flex items-center gap-1.5 rounded border border-[#dde3ec] px-3 py-2 text-sm font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8]"
+                >
+                  <svg
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                    />
+                  </svg>
+                  Usuarios
+                </Link>
+              )}
               <a
                 href="/auth/logout"
                 className="rounded border border-[#dde3ec] px-3 py-2 text-sm font-semibold text-[#566778] transition-colors hover:border-[#d63b3b] hover:text-[#d63b3b]"
@@ -101,18 +198,20 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="mx-auto max-w-5xl px-6 py-12">
         <div className="mb-10">
           <h2 className="text-3xl font-bold text-[#0f2137]">
-            Bienvenido{user?.name ? `, ${user.name}` : ""}
+            {clienteNombre
+              ? `Bienvenido, ${clienteNombre}`
+              : user?.name
+                ? `Bienvenido, ${user.name}`
+                : "Bienvenido"}
           </h2>
           <p className="mt-2 text-base text-[#566778]">
             Selecciona una opción para continuar
           </p>
         </div>
 
-        {/* Route Cards */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {routes.map((route) => (
             <Link

@@ -13,8 +13,22 @@ model clientes {
   nombre               String                 @db.VarChar(255)
   codigo               String?                @db.VarChar(50)
   maquinas_maestra     maquinas_maestra[]
+  usuarios             usuarios[]
   visitas_compras      visitas_compras[]
   visitas_stock_bodega visitas_stock_bodega[]
+}
+
+model usuarios {
+  id         Int          @id @default(autoincrement())
+  email      String?      @unique @db.VarChar(255)
+  dominio    String?      @unique @db.VarChar(255)
+  rol        usuarios_rol @default(cliente)
+  id_cliente Int?
+  activo     Int          @default(1) @db.TinyInt
+  created_at DateTime?    @default(now()) @db.Timestamp(0)
+  clientes   clientes?    @relation(fields: [id_cliente], references: [id_cliente], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([id_cliente], map: "idx_id_cliente")
 }
 
 model contactos_maquina {
@@ -318,6 +332,11 @@ model visitas_stock_maquina {
   kg_recuperada      Decimal?           @db.Decimal(8, 2)
   created_at         DateTime?          @default(now()) @db.Timestamp(0)
   visitas_encabezado visitas_encabezado @relation(fields: [id_visita], references: [id_visita], onDelete: Cascade, map: "vsm_fk_visita")
+}
+
+enum usuarios_rol {
+  super_admin
+  cliente
 }
 
 enum contactos_maquina_rol {
