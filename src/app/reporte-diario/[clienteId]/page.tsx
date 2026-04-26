@@ -8,8 +8,8 @@ import type { DatoRow } from "~/server/api/routers/datos";
 
 // ─── Color palette para dispositivos ─────────────────────────────────────────
 const PALETTE = [
-  "#1e6abf", "#d63030", "#00a87c", "#8a7200",
-  "#9b27af", "#d4600a", "#0e7a8f", "#2e8b57",
+  "#1e6abf", "#00a87c", "#8a7200",
+  "#9b27af", "#d4600a", "#0e7a8f", "#2e8b57", "#d63030",
 ];
 
 // ─── Chart geometry ───────────────────────────────────────────────────────────
@@ -41,14 +41,19 @@ function formatHHMM(totalMins: number): string {
 
 // ─── Tipos para datos procesados ──────────────────────────────────────────────
 type Series = { key: string; color: string; pts: { t: number; v: number }[] };
-type Turb   = { key: string; color: string; kwh: number; horas: number; pctDia: number; pctTotal: number };
+type Turb   = {
+  key: string; color: string;
+  kwh: number; kwhLoad: number; kwhUnload: number; kwhPerHr: number;
+  horas: number; pctDia: number;
+};
 
 type ChartData = {
   series: Series[];
   segments: Record<string, [number, number][]>;
   colors: Record<string, string>;
   turbs: Turb[];
-  totalKwh: number;
+  totalKwh: number; totalKwhLoad: number; totalKwhUnload: number;
+  pctLoad: number; pctUnload: number;
   totalHoras: number;
   promHoras: number;
   avgAmpMedio: number;
@@ -63,7 +68,6 @@ type ChartData = {
 
 // ─── Procesamiento de datos crudos ────────────────────────────────────────────
 function processData(rows: DatoRow[], ampVacio: number): ChartData {
-  // Agrupar por dispositivo
   const byDevice = new Map<string, DatoRow[]>();
   for (const row of rows) {
     const key = row.dispositivo;
@@ -75,7 +79,6 @@ function processData(rows: DatoRow[], ampVacio: number): ChartData {
   const colors: Record<string, string> = {};
   deviceKeys.forEach((k, i) => { colors[k] = PALETTE[i % PALETTE.length]!; });
 
-  // Rango de tiempo de los datos
   const allTimes = rows.map((r) => minsFromMidnight(r.time));
   const rawTMin = allTimes.length ? Math.min(...allTimes) : 0;
   const rawTMax = allTimes.length ? Math.max(...allTimes) : 1440;
@@ -83,7 +86,6 @@ function processData(rows: DatoRow[], ampVacio: number): ChartData {
   const tEnd   = Math.min(1440, Math.ceil(rawTMax / 60) * 60 + 60);
   const tTotal = Math.max(tEnd - tStart, 120);
 
-  // Ticks: mayor cada 60 min, menor cada 30 min
   const majorTicks: { offset: number; label: string }[] = [];
   const minorTicks: { offset: number }[] = [];
   for (let t = 0; t <= tTotal; t += 30) {
@@ -92,7 +94,6 @@ function processData(rows: DatoRow[], ampVacio: number): ChartData {
     else minorTicks.push({ offset: t });
   }
 
-  // Series de amperaje
   const series: Series[] = deviceKeys.map((key) => {
     const devRows = byDevice.get(key)!;
     const pts = devRows.map((r) => ({
@@ -102,11 +103,9 @@ function processData(rows: DatoRow[], ampVacio: number): ChartData {
     return { key, color: colors[key]!, pts };
   });
 
-  // Amperaje máximo para escala Y
   const allAmps = series.flatMap((s) => s.pts.map((p) => p.v));
   const yMax = Math.max(24, Math.ceil((Math.max(...allAmps, 0) + 2) / 4) * 4);
 
-  // Segmentos Gantt (activo = avgI > ampVacio)
   const segments: Record<string, [number, number][]> = {};
   for (const [key, devRows] of byDevice) {
     const segs: [number, number][] = [];
@@ -124,11 +123,10 @@ function processData(rows: DatoRow[], ampVacio: number): ChartData {
     segments[key] = segs;
   }
 
-  // Métricas por dispositivo
   let sumAmp = 0, countAmp = 0;
   const turbs: Turb[] = deviceKeys.map((key) => {
     const devRows = byDevice.get(key)!;
-    let activeMs = 0, totalKwh = 0;
+    let activeMs = 0, kwhLoad = 0, kwhUnload = 0;
     for (let i = 0; i < devRows.length - 1; i++) {
       const r1 = devRows[i]!, r2 = devRows[i + 1]!;
       const dtH = (r2.time.getTime() - r1.time.getTime()) / 3_600_000;
@@ -139,34 +137,46 @@ function processData(rows: DatoRow[], ampVacio: number): ChartData {
       const ub = ((r1.ub ?? 0) + (r2.ub ?? 0)) / 2;
       const uc = ((r1.uc ?? 0) + (r2.uc ?? 0)) / 2;
       const avgI = (ia + ib + ic) / 3;
-      totalKwh += ((ua * ia + ub * ib + uc * ic) / 1000) * dtH;
-      if (avgI > ampVacio) activeMs += r2.time.getTime() - r1.time.getTime();
+      const kwh  = ((ua * ia + ub * ib + uc * ic) / 1000) * dtH;
+      if (avgI > ampVacio) {
+        kwhLoad  += kwh;
+        activeMs += r2.time.getTime() - r1.time.getTime();
+      } else {
+        kwhUnload += kwh;
+      }
     }
     devRows.forEach((r) => {
       const v = ((r.ia ?? 0) + (r.ib ?? 0) + (r.ic ?? 0)) / 3;
       sumAmp += v; countAmp++;
     });
-    const horas = activeMs / 3_600_000;
+    const horas   = activeMs / 3_600_000;
+    const totalKwhTurb = round1(kwhLoad + kwhUnload);
+    const kwhLoadR  = round1(kwhLoad);
+    const kwhUnloadR = round1(kwhUnload);
+    const kwhPerHr  = horas > 0 ? round1(kwhLoadR / horas) : 0;
     return {
       key, color: colors[key]!,
-      kwh:    round1(totalKwh),
-      horas:  round1(horas),
-      pctDia: round1((horas / 24) * 100),
-      pctTotal: 0,
+      kwh:      totalKwhTurb,
+      kwhLoad:  kwhLoadR,
+      kwhUnload: kwhUnloadR,
+      kwhPerHr,
+      horas:    round1(horas),
+      pctDia:   round1((horas / 24) * 100),
     };
   });
 
-  const totalHoras = turbs.reduce((s, t) => s + t.horas, 0);
-  turbs.forEach((t) => {
-    t.pctTotal = totalHoras > 0 ? round1((t.horas / totalHoras) * 100) : 0;
-  });
-
-  const totalKwh = round1(turbs.reduce((s, t) => s + t.kwh, 0));
+  const totalHoras    = turbs.reduce((s, t) => s + t.horas, 0);
+  const totalKwh      = round1(turbs.reduce((s, t) => s + t.kwh, 0));
+  const totalKwhLoad  = round1(turbs.reduce((s, t) => s + t.kwhLoad, 0));
+  const totalKwhUnload = round1(turbs.reduce((s, t) => s + t.kwhUnload, 0));
+  const pctLoad   = totalKwh > 0 ? round1((totalKwhLoad  / totalKwh) * 100) : 0;
+  const pctUnload = totalKwh > 0 ? round1((totalKwhUnload / totalKwh) * 100) : 0;
   const avgAmpMedio = countAmp > 0 ? round1(sumAmp / countAmp) : 0;
 
   return {
     series, segments, colors, turbs,
-    totalKwh, totalHoras: round1(totalHoras),
+    totalKwh, totalKwhLoad, totalKwhUnload, pctLoad, pctUnload,
+    totalHoras: round1(totalHoras),
     promHoras: turbs.length > 0 ? round1(totalHoras / turbs.length) : 0,
     avgAmpMedio,
     tStart, tTotal, majorTicks, minorTicks,
@@ -208,24 +218,19 @@ function AmperageChart({ data, ampMax, ampIdeal, ampVacio }: {
           <line key={offset} x1={xp(offset)} y1={MT} x2={xp(offset)} y2={CH - MB}
             stroke="#eef1f6" strokeWidth={0.5} />
         ))}
-        {/* Reference lines */}
         <line x1={ML} y1={yp(ampMax)}   x2={CW - MR} y2={yp(ampMax)}   stroke="#7ec8e3" strokeWidth={1} strokeDasharray="6,3" />
         <line x1={ML} y1={yp(ampIdeal)} x2={CW - MR} y2={yp(ampIdeal)} stroke="#d4a017" strokeWidth={1} strokeDasharray="6,3" />
         <line x1={ML} y1={yp(ampVacio)} x2={CW - MR} y2={yp(ampVacio)} stroke="#b0bac8" strokeWidth={1} strokeDasharray="6,3" />
-        {/* Data lines */}
         {series.map((s) => (
           <path key={s.key} d={toPath(s.pts)} fill="none"
             stroke={s.color} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
         ))}
-        {/* Y labels left */}
         {Y_TICKS.map((y) => (
           <text key={y} x={ML - 4} y={yp(y) + 3.5} textAnchor="end" fontSize={7.5} fill="#8898a8">{y}A</text>
         ))}
-        {/* X labels */}
         {majorTicks.map(({ offset, label }) => (
           <text key={offset} x={xp(offset)} y={CH - MB + 12} textAnchor="middle" fontSize={7.5} fill="#8898a8">{label}</text>
         ))}
-        {/* Axes */}
         <line x1={ML}      y1={MT}      x2={ML}      y2={CH - MB} stroke="#b0bac8" strokeWidth={0.8} />
         <line x1={CW - MR} y1={MT}      x2={CW - MR} y2={CH - MB} stroke="#b0bac8" strokeWidth={0.8} />
         <line x1={ML}      y1={CH - MB} x2={CW - MR} y2={CH - MB} stroke="#b0bac8" strokeWidth={0.8} />
@@ -316,6 +321,23 @@ function PctBarChart({ turbs }: { turbs: Turb[] }) {
   );
 }
 
+function DoobleLogo() {
+  return (
+    <svg viewBox="0 0 148 44" className="h-9 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Logo mark – 4 overlapping circles */}
+      <circle cx="11"  cy="13" r="9" stroke="#1a3a5c" strokeWidth="2.2" />
+      <circle cx="22"  cy="13" r="9" stroke="#1a3a5c" strokeWidth="2.2" />
+      <circle cx="11"  cy="30" r="9" stroke="#1a3a5c" strokeWidth="2.2" />
+      <circle cx="22"  cy="30" r="9" stroke="#1a3a5c" strokeWidth="2.2" />
+      {/* Word mark */}
+      <text x="36" y="26" fontFamily="Arial Black, Arial, sans-serif" fontWeight="900"
+        fontSize="19" letterSpacing="1.5" fill="#1a3a5c">DOOBLE</text>
+      <text x="37" y="36" fontFamily="Arial, sans-serif" fontWeight="400"
+        fontSize="5.2" letterSpacing="1.8" fill="#5a6a7a">SURFACE PROCESS CONTROL</text>
+    </svg>
+  );
+}
+
 function MaqRow({ label, value, extra, extraVal, unit, highlight = false }: {
   label: string; value: string | number; extra: string;
   extraVal: string | number; unit: string; highlight?: boolean;
@@ -340,11 +362,9 @@ function ReporteContent() {
 
   const numClienteId = parseInt(clienteId ?? "0", 10);
 
-  // Estado de selección (de search params o defaults)
   const maquinaParam = searchParams.get("maquina");
   const fechaParam   = searchParams.get("fecha") ?? new Date().toISOString().slice(0, 10);
 
-  // Máquinas con dispositivos IoT para este cliente
   const { data: maquinasIoT, isLoading: loadingMaq } = api.datos.getMaquinasConDatos.useQuery(
     { id_cliente: numClienteId },
     { enabled: numClienteId > 0 },
@@ -354,22 +374,30 @@ function ReporteContent() {
     ? parseInt(maquinaParam, 10)
     : (maquinasIoT?.[0]?.id_maquina ?? null);
 
-  // Specs de la máquina seleccionada (amp_vacio, amp_maximo)
   const { data: maquinasSpecs } = api.maquinas.listByCliente.useQuery(
     { id_cliente: numClienteId },
     { enabled: numClienteId > 0 },
   );
-  const specs = maquinasSpecs?.find((m) => m.id_maquina === selectedMaquinaId);
+  const specs     = maquinasSpecs?.find((m) => m.id_maquina === selectedMaquinaId);
   const ampVacio  = specs?.amp_vacio  ?? 5;
   const ampMaximo = specs?.amp_maximo ?? 24;
   const ampIdeal  = ampMaximo > 0 ? Math.round(ampMaximo * 0.85) : 20;
 
-  // Datos IoT del día
   const { data: rawRows, isLoading: loadingDatos } = api.datos.getDatosMaquinaFecha.useQuery(
     {
       id_cliente: numClienteId,
       id_maquina: selectedMaquinaId ?? 0,
       fecha: fechaParam,
+    },
+    { enabled: numClienteId > 0 && selectedMaquinaId != null },
+  );
+
+  const { data: resumen30d } = api.datos.getResumen30Dias.useQuery(
+    {
+      id_cliente: numClienteId,
+      id_maquina: selectedMaquinaId ?? 0,
+      fecha: fechaParam,
+      amp_vacio: ampVacio,
     },
     { enabled: numClienteId > 0 && selectedMaquinaId != null },
   );
@@ -401,7 +429,6 @@ function ReporteContent() {
         <span className="font-semibold text-[#3d4f63]">{clienteNombre || `Cliente ${clienteId}`}</span>
         <div className="flex-1" />
 
-        {/* Selector de máquina */}
         {maquinasIoT && maquinasIoT.length > 1 && (
           <select
             value={selectedMaquinaId ?? ""}
@@ -414,7 +441,6 @@ function ReporteContent() {
           </select>
         )}
 
-        {/* Selector de fecha */}
         <input
           type="date"
           value={fechaParam}
@@ -479,13 +505,8 @@ function ReporteContent() {
                 REPORTE GRANALLADO DIARIO &nbsp;·&nbsp; {maquinaNombre}
               </h1>
             </div>
-            <div className="flex shrink-0 items-center gap-2.5 border-l border-[#dde3ec] px-4 py-2.5">
-              <div className="text-right text-[8px] leading-tight">
-                <div className="text-[10px] font-black tracking-widest text-[#1a7a50]">IN PLANT</div>
-                <div className="text-[#7a8898]">SUPPORT BY</div>
-                <div className="font-bold text-[#2d3f52]">DOOBLE</div>
-              </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded bg-[#2d3f52] text-[13px] font-black text-white">D</div>
+            <div className="flex shrink-0 items-center border-l border-[#dde3ec] px-4 py-2">
+              <DoobleLogo />
             </div>
           </div>
 
@@ -502,13 +523,15 @@ function ReporteContent() {
             {/* Specs */}
             <table className="w-full">
               <tbody>
-                <MaqRow label="Máquina"    value={maquinaNombre}
+                <MaqRow label="Máquina"      value={maquinaNombre}
                   extra="Amp Máximo"  extraVal={ampMaximo}   unit="A" />
                 <MaqRow label="Dispositivos" value={chartData.series.length}
-                  extra="Amp Vacio"   extraVal={ampVacio}    unit="A" />
-                {specs && (
-                  <MaqRow label="Potencia HP" value={specs.potencia_hp ?? "—"}
-                    extra="Amp Ideal" extraVal={ampIdeal}  unit="A" />
+                  extra="Amp Ideal"   extraVal={ampIdeal}    unit="A"  highlight />
+                <MaqRow label="Voltaje"      value={specs ? "440" : "—"}
+                  extra="Amp Vacío"   extraVal={ampVacio}    unit="A" />
+                {specs?.potencia_hp != null && (
+                  <MaqRow label="Potencia HP" value={specs.potencia_hp}
+                    extra="Turbinas"  extraVal={specs.cantidad_turbinas ?? "—"} unit="" />
                 )}
               </tbody>
             </table>
@@ -516,28 +539,38 @@ function ReporteContent() {
             {/* Resumen operación */}
             <div className="flex flex-col">
               <div className="border-b border-[#dde3ec] bg-[#e8eef6] px-3 py-1.5 text-center text-[10px] font-bold tracking-wider text-[#1a5fa8] uppercase">
-                Resumen de operación
+                Resumen de Operación
               </div>
               <table className="w-full text-[10px]">
                 <thead>
                   <tr className="border-b border-[#dde3ec] bg-[#f5f7fa]">
                     <th className="px-3 py-1 text-left font-semibold text-[#8898a8]"></th>
                     <th className="px-3 py-1 text-right font-semibold text-[#8898a8]">Valores del día</th>
+                    <th className="px-3 py-1 text-right font-semibold text-[#8898a8]">Últ. 30 días</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    { label: "Consumo KWh",  val: chartData.totalKwh,    suffix: " kWh" },
-                    { label: "Amp. Medio",   val: chartData.avgAmpMedio, suffix: " A" },
-                    { label: "Horas Efectivas", val: chartData.totalHoras, suffix: " h" },
-                  ].map((row) => (
-                    <tr key={row.label} className="border-b border-[#dde3ec]">
-                      <td className="px-3 py-1 text-[#5a6a7a]">{row.label}</td>
-                      <td className="px-3 py-1 text-right font-bold text-[#2d3f52]">
-                        {row.val}{row.suffix}
-                      </td>
-                    </tr>
-                  ))}
+                  <tr className="border-b border-[#dde3ec]">
+                    <td className="px-3 py-1 text-[#5a6a7a]">Consumo KWh</td>
+                    <td className="px-3 py-1 text-right font-bold text-[#2d3f52]">{chartData.totalKwh}</td>
+                    <td className="px-3 py-1 text-right font-semibold text-[#566778]">
+                      {resumen30d ? resumen30d.total_kwh : "—"}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-[#dde3ec]">
+                    <td className="px-3 py-1 text-[#5a6a7a]">Amp. Medio</td>
+                    <td className="px-3 py-1 text-right font-bold text-[#2d3f52]">{chartData.avgAmpMedio} A</td>
+                    <td className="px-3 py-1 text-right font-semibold text-[#566778]">
+                      {resumen30d ? `${resumen30d.avg_amp} A` : "—"}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-[#dde3ec]">
+                    <td className="px-3 py-1 text-[#5a6a7a]">Horas Granallando</td>
+                    <td className="px-3 py-1 text-right font-bold text-[#2d3f52]">{chartData.totalHoras} h</td>
+                    <td className="px-3 py-1 text-right font-semibold text-[#566778]">
+                      {resumen30d ? `${resumen30d.horas_granallando} h` : "—"}
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -583,29 +616,48 @@ function ReporteContent() {
             <div className="grid grid-cols-[1fr_auto] items-start gap-4">
               <div className="overflow-hidden rounded border border-[#dde3ec] text-[10px]">
                 <div className="grid grid-cols-2 divide-x divide-[#dde3ec]">
+
                   {/* Consumo eléctrico */}
                   <div>
                     <div className="border-b border-[#dde3ec] bg-[#e8eef6] px-3 py-1 text-center text-[10px] font-bold text-[#1a5fa8]">
                       Consumo Eléctrico
                     </div>
                     <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-[#dde3ec] bg-[#f5f7fa]">
+                          <th className="px-2 py-1 text-left font-semibold text-[#8898a8]"></th>
+                          <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">kWh Total</th>
+                          <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">LOAD</th>
+                          <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">UNLOAD</th>
+                          <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">kWh/hr</th>
+                        </tr>
+                      </thead>
                       <tbody>
                         {chartData.turbs.map((t) => (
                           <tr key={t.key} className="border-b border-[#dde3ec]">
-                            <td className="px-3 py-1.5">
+                            <td className="px-2 py-1.5">
                               <span className="mr-1.5 inline-block h-2 w-2.5 rounded-sm" style={{ background: t.color }} />
                               {t.key}
                             </td>
-                            <td className="px-3 py-1.5 text-right font-semibold text-[#2d3f52] tabular-nums">
-                              {t.kwh} kWh
-                            </td>
+                            <td className="px-2 py-1.5 text-right font-semibold tabular-nums text-[#2d3f52]">{t.kwh}</td>
+                            <td className="px-2 py-1.5 text-right tabular-nums text-[#2d3f52]">{t.kwhLoad}</td>
+                            <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{t.kwhUnload}</td>
+                            <td className="px-2 py-1.5 text-right tabular-nums text-[#1a7a50] font-semibold">{t.kwhPerHr}</td>
                           </tr>
                         ))}
                         <tr className="border-t-2 border-[#b0bac8] bg-[#f0f4f8]">
-                          <td className="px-3 py-1.5 font-bold text-[#2d3f52]">Total</td>
-                          <td className="px-3 py-1.5 text-right font-bold text-[#2d3f52] tabular-nums">
-                            {chartData.totalKwh} kWh
-                          </td>
+                          <td className="px-2 py-1.5 font-bold text-[#2d3f52]">Total</td>
+                          <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">{chartData.totalKwh}</td>
+                          <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">{chartData.totalKwhLoad}</td>
+                          <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#566778]">{chartData.totalKwhUnload}</td>
+                          <td />
+                        </tr>
+                        <tr className="border-t border-[#dde3ec] bg-[#f5f7fa]">
+                          <td className="px-2 py-1 text-[#8898a8]">%</td>
+                          <td />
+                          <td className="px-2 py-1 text-right font-semibold tabular-nums text-[#1a5fa8]">{chartData.pctLoad} %</td>
+                          <td className="px-2 py-1 text-right font-semibold tabular-nums text-[#566778]">{chartData.pctUnload} %</td>
+                          <td />
                         </tr>
                       </tbody>
                     </table>
@@ -621,8 +673,7 @@ function ReporteContent() {
                         <tr className="border-b border-[#dde3ec] bg-[#f5f7fa]">
                           <th className="px-2 py-1 text-left font-semibold text-[#8898a8]"></th>
                           <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">horas</th>
-                          <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">% del día</th>
-                          <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">% del Total</th>
+                          <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">% del día (24H)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -634,22 +685,24 @@ function ReporteContent() {
                             </td>
                             <td className="px-2 py-1.5 text-right tabular-nums">{t.horas.toFixed(1)}</td>
                             <td className="px-2 py-1.5 text-right tabular-nums">{t.pctDia.toFixed(1)} %</td>
-                            <td className="px-2 py-1.5 text-right tabular-nums">{t.pctTotal.toFixed(1)} %</td>
                           </tr>
                         ))}
                         <tr className="border-t-2 border-[#b0bac8] bg-[#f0f4f8]">
-                          <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]" colSpan={2}>
-                            Promedio horas
+                          <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]" colSpan={1}>
+                            Promedio
                           </td>
-                          <td className="px-2 py-1.5 text-right font-bold text-[#2d3f52] tabular-nums" colSpan={2}>
+                          <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">
                             {chartData.promHoras} h
+                          </td>
+                          <td className="px-2 py-1.5 text-right tabular-nums text-[#1a5fa8] font-semibold">
+                            {round1((chartData.promHoras / 24) * 100)} %
                           </td>
                         </tr>
                         <tr className="border-t border-[#dde3ec] bg-[#f0f4f8]">
-                          <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]" colSpan={2}>
+                          <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]" colSpan={1}>
                             Total horas
                           </td>
-                          <td className="px-2 py-1.5 text-right font-bold text-[#2d3f52] tabular-nums" colSpan={2}>
+                          <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]" colSpan={2}>
                             {chartData.totalHoras} h
                           </td>
                         </tr>
@@ -671,8 +724,9 @@ function ReporteContent() {
           {/* Footer */}
           <div className="flex items-center justify-between border-t border-[#dde3ec] bg-[#f5f7fa] px-5 py-2">
             <p className="text-[9px] text-[#5a6a7a]">
-              <span className="font-semibold">Contacto InPlant</span>
+              <span className="font-semibold">CONTACTO IQgineer</span>
               {" · "}Ing. Miguel Rios{" · "}cel: 811 824 3178{" · "}email: miguel.rios@dooble-inox.de
+              {" · "}www.dooble-inox.de
             </p>
             <div className="rounded bg-[#2d3f52] px-3 py-1 text-[10px] font-black tracking-widest text-white">DOOBLE</div>
           </div>

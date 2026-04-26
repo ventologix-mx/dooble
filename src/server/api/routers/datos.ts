@@ -45,7 +45,65 @@ export type DatoRow = {
   cliente: string;
 };
 
+type RawResumen30d = {
+  total_kwh: unknown;
+  avg_amp: unknown;
+  horas_granallando: unknown;
+};
+
 export const datosRouter = createTRPCRouter({
+  // Métricas agregadas de los últimos 30 días para la columna de comparación.
+  getResumen30Dias: publicProcedure
+    .input(
+      z.object({
+        id_cliente: z.number().int().positive(),
+        id_maquina: z.number().int().positive(),
+        fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        amp_vacio: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { id_cliente, id_maquina, fecha, amp_vacio } = input;
+
+      const fechaFin = new Date(fecha + "T12:00:00Z");
+      fechaFin.setUTCDate(fechaFin.getUTCDate() + 1);
+      const fechaInicio = new Date(fechaFin);
+      fechaInicio.setUTCDate(fechaInicio.getUTCDate() - 30);
+
+      const fechaInicioStr = fechaInicio.toISOString().slice(0, 10);
+      const fechaFinStr    = fechaFin.toISOString().slice(0, 10);
+
+      const rows = await ctx.db.$queryRaw<RawResumen30d[]>`
+        SELECT
+          COALESCE(SUM(t.energy_kwh), 0)                                               AS total_kwh,
+          COALESCE(AVG(t.avg_i), 0)                                                    AS avg_amp,
+          COALESCE(SUM(CASE WHEN t.avg_i > ${amp_vacio} THEN t.dt_h ELSE 0 END), 0)   AS horas_granallando
+        FROM (
+          SELECT
+            (
+              (COALESCE(d.ua,0)*COALESCE(d.ia,0) + COALESCE(d.ub,0)*COALESCE(d.ib,0) + COALESCE(d.uc,0)*COALESCE(d.ic,0)) / 1000.0
+            ) * (TIMESTAMPDIFF(SECOND, LAG(d.time) OVER w, d.time) / 3600.0)          AS energy_kwh,
+            (COALESCE(d.ia,0) + COALESCE(d.ib,0) + COALESCE(d.ic,0)) / 3.0           AS avg_i,
+            TIMESTAMPDIFF(SECOND, LAG(d.time) OVER w, d.time) / 3600.0                AS dt_h
+          FROM Dooble.datos d
+          INNER JOIN Dooble.dispositivos dis ON dis.id = d.device_id
+          WHERE dis.id_maquina = ${id_maquina}
+            AND dis.id_cliente = ${id_cliente}
+            AND d.time >= ${fechaInicioStr}
+            AND d.time <  ${fechaFinStr}
+          WINDOW w AS (PARTITION BY d.device_id ORDER BY d.time)
+        ) t
+        WHERE t.dt_h IS NOT NULL AND t.dt_h > 0 AND t.dt_h < 1
+      `;
+
+      const r = rows[0];
+      return {
+        total_kwh:         Math.round(Number(r?.total_kwh ?? 0) * 10) / 10,
+        avg_amp:           Math.round(Number(r?.avg_amp ?? 0) * 10) / 10,
+        horas_granallando: Math.round(Number(r?.horas_granallando ?? 0) * 10) / 10,
+      };
+    }),
+
   // Clientes que tienen al menos un dispositivo con datos reales en la tabla datos.
   getClientesConDatos: publicProcedure.query(async ({ ctx }) => {
     const rows = await ctx.db.$queryRaw<RawClienteRow[]>`
