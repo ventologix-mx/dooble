@@ -18,6 +18,12 @@ type RawMaquinaRow = {
   maquina: string;
 };
 
+type RawClienteRow = {
+  id_cliente: unknown;
+  nombre: string;
+  codigo: string | null;
+};
+
 function toNum(v: unknown): number | null {
   if (v === null || v === undefined) return null;
   const n = Number(v);
@@ -40,6 +46,25 @@ export type DatoRow = {
 };
 
 export const datosRouter = createTRPCRouter({
+  // Clientes que tienen al menos un dispositivo con datos reales en la tabla datos.
+  getClientesConDatos: publicProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.$queryRaw<RawClienteRow[]>`
+      SELECT DISTINCT
+        c.id_cliente,
+        c.nombre,
+        c.codigo
+      FROM Dooble.clientes      c
+      INNER JOIN Dooble.dispositivos dis ON dis.id_cliente = c.id_cliente
+      INNER JOIN Dooble.datos        d   ON d.device_id   = dis.id
+      ORDER BY c.nombre
+    `;
+    return rows.map((r) => ({
+      id_cliente: Number(r.id_cliente),
+      nombre:     r.nombre,
+      codigo:     r.codigo ?? null,
+    }));
+  }),
+
   // Devuelve todas las máquinas que tienen dispositivos IoT registrados para un cliente.
   getMaquinasConDatos: publicProcedure
     .input(z.object({ id_cliente: z.number().int().positive() }))

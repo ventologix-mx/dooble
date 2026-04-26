@@ -156,6 +156,7 @@ model maquinas_maestra {
   maquinas_turbinas         maquinas_turbinas?
   visitas_encabezado        visitas_encabezado[]
 
+  @@map("maquinas")
   @@index([id_cliente], map: "id_cliente")
 }
 

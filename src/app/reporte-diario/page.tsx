@@ -3,115 +3,19 @@
 import Link from "next/link";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useState } from "react";
-
-// ─── Mock clients ─────────────────────────────────────────────────────────────
-
-const CLIENTES = [
-  {
-    id: "frontera-aluminios",
-    nombre: "Frontera Aluminios",
-    maquina: "Granalladora #1 Perfiles",
-    codigo: "2452502",
-    turbinas: 4,
-    ultimaFecha: "04/15/2026",
-    ampMedio: 14.7,
-    horasEfectivas: 18.9,
-    consumoKwh: 916.3,
-    status: "operativa" as const,
-  },
-  {
-    id: "industrias-monterrey",
-    nombre: "Industrias Monterrey SA",
-    maquina: "Granalladora #2 Estructural",
-    codigo: "2451890",
-    turbinas: 6,
-    ultimaFecha: "04/14/2026",
-    ampMedio: 13.2,
-    horasEfectivas: 16.4,
-    consumoKwh: 1240.8,
-    status: "operativa" as const,
-  },
-  {
-    id: "aceros-del-norte",
-    nombre: "Aceros del Norte",
-    maquina: "Granalladora #1 Tubería",
-    codigo: "2450341",
-    turbinas: 2,
-    ultimaFecha: "04/13/2026",
-    ampMedio: 9.1,
-    horasEfectivas: 11.2,
-    consumoKwh: 384.5,
-    status: "alerta" as const,
-  },
-  {
-    id: "metalsa",
-    nombre: "Metalsa Ramos Arizpe",
-    maquina: "Granalladora #3 Chasis",
-    codigo: "2449780",
-    turbinas: 8,
-    ultimaFecha: "04/15/2026",
-    ampMedio: 17.3,
-    horasEfectivas: 22.1,
-    consumoKwh: 2180.4,
-    status: "operativa" as const,
-  },
-  {
-    id: "vitro",
-    nombre: "Vitro Packaging",
-    maquina: "Granalladora #1 Moldes",
-    codigo: "2448620",
-    turbinas: 4,
-    ultimaFecha: "04/12/2026",
-    ampMedio: 11.8,
-    horasEfectivas: 14.6,
-    consumoKwh: 720.9,
-    status: "inactiva" as const,
-  },
-  {
-    id: "nemak",
-    nombre: "Nemak Monterrey",
-    maquina: "Granalladora #2 Aluminio",
-    codigo: "2447310",
-    turbinas: 4,
-    ultimaFecha: "04/15/2026",
-    ampMedio: 15.9,
-    horasEfectivas: 20.3,
-    consumoKwh: 1054.2,
-    status: "operativa" as const,
-  },
-];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const STATUS_STYLES = {
-  operativa: {
-    dot: "bg-[#1a9e5c]",
-    badge: "bg-[#e8f7f0] text-[#1a9e5c]",
-    label: "Operativa",
-  },
-  alerta: {
-    dot: "bg-[#d4860a]",
-    badge: "bg-[#fef6e8] text-[#d4860a]",
-    label: "Alerta",
-  },
-  inactiva: {
-    dot: "bg-[#8898a8]",
-    badge: "bg-[#f0f2f5] text-[#8898a8]",
-    label: "Inactiva",
-  },
-};
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+import { api } from "~/trpc/react";
 
 export default function ReporteGranalladoPage() {
   const { user } = useUser();
   const [search, setSearch] = useState("");
 
-  const filtered = CLIENTES.filter(
+  // Solo clientes que tienen dispositivos con datos reales en la tabla datos
+  const { data: clientes, isLoading } = api.datos.getClientesConDatos.useQuery();
+
+  const filtered = (clientes ?? []).filter(
     (c) =>
       c.nombre.toLowerCase().includes(search.toLowerCase()) ||
-      c.maquina.toLowerCase().includes(search.toLowerCase()) ||
-      c.codigo.includes(search),
+      (c.codigo ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -153,8 +57,9 @@ export default function ReporteGranalladoPage() {
               Seleccionar Cliente
             </h2>
             <p className="mt-1 text-sm text-[#566778]">
-              {filtered.length} cliente{filtered.length !== 1 ? "s" : ""}{" "}
-              disponible{filtered.length !== 1 ? "s" : ""}
+              {isLoading
+                ? "Cargando…"
+                : `${filtered.length} cliente${filtered.length !== 1 ? "s" : ""} con telemetría activa`}
             </p>
           </div>
 
@@ -175,7 +80,7 @@ export default function ReporteGranalladoPage() {
             </svg>
             <input
               type="text"
-              placeholder="Buscar cliente o máquina..."
+              placeholder="Buscar cliente o código…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-lg border border-[#dde3ec] bg-white py-2 pr-4 pl-9 text-sm text-[#3d4f63] placeholder:text-[#aab4c0] focus:border-[#d4860a] focus:ring-2 focus:ring-[#d4860a]/20 focus:outline-none"
@@ -183,8 +88,20 @@ export default function ReporteGranalladoPage() {
           </div>
         </div>
 
-        {/* Client grid */}
-        {filtered.length === 0 ? (
+        {/* Loading skeleton */}
+        {isLoading && (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-28 animate-pulse rounded-xl border border-[#dde3ec] bg-white"
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#dde3ec] bg-white py-20 text-center">
             <svg
               className="mb-3 h-10 w-10 text-[#aab4c0]"
@@ -200,95 +117,56 @@ export default function ReporteGranalladoPage() {
               />
             </svg>
             <p className="text-sm font-semibold text-[#8898a8]">
-              Sin resultados para &ldquo;{search}&rdquo;
+              {search
+                ? `Sin resultados para "${search}"`
+                : "Ningún cliente tiene datos de telemetría registrados"}
             </p>
           </div>
-        ) : (
+        )}
+
+        {/* Client grid */}
+        {!isLoading && filtered.length > 0 && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((c) => {
-              const st = STATUS_STYLES[c.status];
-              return (
-                <Link
-                  key={c.id}
-                  href={`/reporte-diario/${c.id}`}
-                  className="group rounded-xl border border-[#dde3ec] bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#d4860a]/40 hover:shadow-md"
-                >
-                  {/* Top row */}
-                  <div className="mb-3 flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <h3 className="truncate text-[15px] font-bold text-[#0f2137] group-hover:text-[#d4860a]">
-                        {c.nombre}
-                      </h3>
-                      <p className="mt-0.5 truncate text-[12px] text-[#7a8898]">
-                        {c.maquina}
+            {filtered.map((c) => (
+              <Link
+                key={c.id_cliente}
+                href={`/reporte-diario/${c.id_cliente}`}
+                className="group rounded-xl border border-[#dde3ec] bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-[#d4860a]/40 hover:shadow-md"
+              >
+                <div className="mb-4 flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="truncate text-[15px] font-bold text-[#0f2137] group-hover:text-[#d4860a]">
+                      {c.nombre}
+                    </h3>
+                    {c.codigo && (
+                      <p className="mt-0.5 text-[12px] text-[#7a8898]">
+                        Código: {c.codigo}
                       </p>
-                    </div>
-                    <span
-                      className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${st.badge}`}
-                    >
-                      {st.label}
-                    </span>
+                    )}
                   </div>
+                  <span className="shrink-0 rounded-full bg-[#e8f7f0] px-2.5 py-0.5 text-[11px] font-semibold text-[#1a9e5c]">
+                    IoT activo
+                  </span>
+                </div>
 
-                  {/* Stats */}
-                  <div className="mb-4 grid grid-cols-3 gap-2 rounded-lg bg-[#f5f7fa] p-3">
-                    <div className="text-center">
-                      <p className="text-[11px] text-[#8898a8]">Amp. Medio</p>
-                      <p className="text-[14px] font-bold text-[#0f2137]">
-                        {c.ampMedio}A
-                      </p>
-                    </div>
-                    <div className="border-x border-[#dde3ec] text-center">
-                      <p className="text-[11px] text-[#8898a8]">Horómetro</p>
-                      <p className="text-[14px] font-bold text-[#0f2137]">
-                        {c.horasEfectivas}h
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-[11px] text-[#8898a8]">Consumo</p>
-                      <p className="text-[14px] font-bold text-[#0f2137]">
-                        {c.consumoKwh}
-                      </p>
-                      <p className="text-[10px] text-[#8898a8]">kWh</p>
-                    </div>
-                  </div>
-
-                  {/* Footer row */}
-                  <div className="flex items-center justify-between text-[11px] text-[#8898a8]">
-                    <span>
-                      <span className="font-semibold text-[#566778]">
-                        Código:
-                      </span>{" "}
-                      {c.codigo}
-                      {" · "}
-                      <span className="font-semibold text-[#566778]">
-                        Turbinas:
-                      </span>{" "}
-                      {c.turbinas}
-                    </span>
-                    <span>{c.ultimaFecha}</span>
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-[#d4860a] opacity-0 transition-opacity group-hover:opacity-100">
-                    Ver reporte
-                    <svg
-                      className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </div>
-                </Link>
-              );
-            })}
+                <div className="flex items-center gap-1.5 text-[12px] font-semibold text-[#d4860a] opacity-0 transition-opacity group-hover:opacity-100">
+                  Ver reporte
+                  <svg
+                    className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </div>
+              </Link>
+            ))}
           </div>
         )}
       </main>
