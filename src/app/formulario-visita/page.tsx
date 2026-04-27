@@ -172,10 +172,6 @@ export default function FormularioVisitaPage() {
   const [fecha, setFecha] = useState(
     () => new Date().toISOString().split("T")[0]!,
   );
-  const [fechaDisplay, setFechaDisplay] = useState(() => {
-    const [y, m, d] = new Date().toISOString().split("T")[0]!.split("-");
-    return `${d}/${m}/${y}`;
-  });
   const [maquinasChecked, setMaquinasChecked] = useState<boolean[]>([]);
   const [bodegaRows, setBodegaRows] = useState<BodegaRow[]>([]);
   const [compraRows, setCompraRows] = useState<CompraRow[]>([]);

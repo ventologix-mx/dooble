@@ -31,7 +31,7 @@ function toNum(v: unknown): number | null {
 }
 
 function toDate(v: Date | string): Date {
-  return v instanceof Date ? v : new Date(v as string);
+  return v instanceof Date ? v : new Date(v);
 }
 
 export type DatoRow = {

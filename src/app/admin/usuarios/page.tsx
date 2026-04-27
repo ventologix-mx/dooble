@@ -368,7 +368,7 @@ function UsuariosContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {usuarios.map((u, idx) => (
+                  {usuarios.map((u, _idx) => (
                     <tr
                       key={u.id}
                       className={`border-b border-[#dde3ec] transition-colors last:border-0 ${

@@ -329,11 +329,11 @@ function MaqRow({ label, value, extra, extraVal, unit, highlight = false }: {
 }) {
   return (
     <tr className="border-b border-[#dde3ec]">
-      <td className="border-r border-[#dde3ec] bg-[#f5f7fa] px-2 py-[5px] text-[10px] font-semibold text-[#5a6a7a]">{label}</td>
-      <td className="border-r border-[#dde3ec] px-2 py-[5px] text-[10px] text-[#2d3f52]">{value}</td>
-      <td className="border-r border-[#dde3ec] bg-[#f5f7fa] px-2 py-[5px] text-[10px] font-semibold text-[#5a6a7a]">{extra}</td>
-      <td className={`border-r border-[#dde3ec] px-2 py-[5px] text-right text-[10px] font-bold ${highlight ? "text-[#1a5fa8]" : "text-[#2d3f52]"}`}>{extraVal}</td>
-      <td className="px-2 py-[5px] text-[10px] text-[#8898a8]">{unit}</td>
+      <td className="border-r border-[#dde3ec] bg-[#f5f7fa] px-2 py-[5px] text-[12px] font-semibold text-[#5a6a7a]">{label}</td>
+      <td className="border-r border-[#dde3ec] px-2 py-[5px] text-[12px] text-[#2d3f52]">{value}</td>
+      <td className="border-r border-[#dde3ec] bg-[#f5f7fa] px-2 py-[5px] text-[12px] font-semibold text-[#5a6a7a]">{extra}</td>
+      <td className={`border-r border-[#dde3ec] px-2 py-[5px] text-right text-[12px] font-bold ${highlight ? "text-[#1a5fa8]" : "text-[#2d3f52]"}`}>{extraVal}</td>
+      <td className="px-2 py-[5px] text-[12px] text-[#8898a8]">{unit}</td>
     </tr>
   );
 }
@@ -419,7 +419,7 @@ function ReporteContent() {
   return (
     <div className="min-h-screen bg-[#eef1f6] py-6 print:bg-white print:py-0">
       {/* Breadcrumb + controles */}
-      <div className="mx-auto mb-4 flex max-w-[1120px] flex-wrap items-center gap-2 px-4 text-[12px] text-[#8898a8] print:hidden">
+      <div className="mx-auto mb-4 flex max-w-[1120px] flex-wrap items-center gap-2 px-4 text-[14px] text-[#8898a8] print:hidden">
         <Link href="/home" className="hover:text-[#1a5fa8]">Inicio</Link>
         <span>/</span>
         <Link href="/reporte-diario" className="hover:text-[#1a5fa8]">Reporte Granallado</Link>
@@ -431,7 +431,7 @@ function ReporteContent() {
           <select
             value={selectedMaquinaId ?? ""}
             onChange={(e) => navigate(Number(e.target.value), fechaParam)}
-            className="rounded border border-[#dde3ec] bg-white px-2 py-1 text-[11px] text-[#3d4f63] focus:border-[#1a5fa8] focus:outline-none"
+            className="rounded border border-[#dde3ec] bg-white px-2 py-1 text-[13px] text-[#3d4f63] focus:border-[#1a5fa8] focus:outline-none"
           >
             {maquinasIoT.map((m) => (
               <option key={m.id_maquina} value={m.id_maquina}>{m.maquina}</option>
@@ -446,12 +446,12 @@ function ReporteContent() {
             if (sinMaquina) void router.push(`/reporte-diario/${clienteId}?fecha=${e.target.value}`);
             else if (selectedMaquinaId) navigate(selectedMaquinaId, e.target.value);
           }}
-          className="rounded border border-[#dde3ec] bg-white px-2 py-1 text-[11px] text-[#3d4f63] focus:border-[#1a5fa8] focus:outline-none"
+          className="rounded border border-[#dde3ec] bg-white px-2 py-1 text-[13px] text-[#3d4f63] focus:border-[#1a5fa8] focus:outline-none"
         />
 
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-1.5 rounded border border-[#dde3ec] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8]"
+          className="flex items-center gap-1.5 rounded border border-[#dde3ec] bg-white px-3 py-1.5 text-[13px] font-semibold text-[#566778] transition-colors hover:border-[#1a5fa8] hover:text-[#1a5fa8]"
         >
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -469,7 +469,7 @@ function ReporteContent() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            <span className="text-sm font-semibold">Cargando datos…</span>
+            <span className="text-base font-semibold">Cargando datos…</span>
           </div>
         </div>
       )}
@@ -481,10 +481,10 @@ function ReporteContent() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <p className="text-sm font-semibold text-[#8898a8]">
+          <p className="text-base font-semibold text-[#8898a8]">
             Sin datos de telemetría para el {fechaDisplay}
           </p>
-          <p className="mt-1 text-xs text-[#aab4c0]">Selecciona otra fecha o verifica la conexión del dispositivo.</p>
+          <p className="mt-1 text-sm text-[#aab4c0]">Selecciona otra fecha o verifica la conexión del dispositivo.</p>
         </div>
       )}
 
@@ -495,7 +495,7 @@ function ReporteContent() {
           {/* Header */}
           <div className="flex items-stretch border-b-2 border-[#dde3ec]">
             <div className="flex flex-1 items-center justify-center px-4 py-2.5">
-              <h1 className="text-center text-[13px] font-extrabold tracking-wide text-[#2d3f52] uppercase">
+              <h1 className="text-center text-[15px] font-extrabold tracking-wide text-[#2d3f52] uppercase">
                 REPORTE GRANALLADO DIARIO &nbsp;·&nbsp; {maquinaNombre}
               </h1>
             </div>
@@ -503,8 +503,8 @@ function ReporteContent() {
 
           {/* Cliente + Fecha */}
           <div className="flex items-center justify-between border-b border-[#dde3ec] bg-[#f0f4f8] px-5 py-1.5">
-            <span className="text-[15px] font-bold text-[#2d3f52]">{chartData.cliente}</span>
-            <span className="text-[12px] font-semibold tracking-wide text-[#566778]">
+            <span className="text-[17px] font-bold text-[#2d3f52]">{chartData.cliente}</span>
+            <span className="text-[14px] font-semibold tracking-wide text-[#566778]">
               FECHA:&nbsp; {fechaDisplay}
             </span>
           </div>
@@ -529,10 +529,10 @@ function ReporteContent() {
 
             {/* Resumen operación */}
             <div className="flex flex-col">
-              <div className="border-b border-[#dde3ec] bg-[#e8eef6] px-3 py-1.5 text-center text-[10px] font-bold tracking-wider text-[#1a5fa8] uppercase">
+              <div className="border-b border-[#dde3ec] bg-[#e8eef6] px-3 py-1.5 text-center text-[12px] font-bold tracking-wider text-[#1a5fa8] uppercase">
                 Resumen de Operación
               </div>
-              <table className="w-full text-[10px]">
+              <table className="w-full text-[12px]">
                 <thead>
                   <tr className="border-b border-[#dde3ec] bg-[#f5f7fa]">
                     <th className="px-3 py-1 text-left font-semibold text-[#8898a8]"></th>
@@ -572,8 +572,8 @@ function ReporteContent() {
             {/* Amperaje */}
             <div>
               <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[11px] font-bold text-[#2d3f52]">Turbinas: Variación de Amperajes</span>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[9px] text-[#5a6a7a]">
+                <span className="text-[13px] font-bold text-[#2d3f52]">Turbinas: Variación de Amperajes</span>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#5a6a7a]">
                   {chartData.series.map((s) => (
                     <span key={s.key} className="flex items-center gap-1">
                       <span className="inline-block h-2.5 w-5 rounded-sm" style={{ background: s.color }} />
@@ -599,18 +599,18 @@ function ReporteContent() {
 
             {/* Gantt */}
             <div>
-              <p className="mb-1.5 text-[11px] font-bold text-[#2d3f52]">Turbinas: Tiempo Granallado Efectivo</p>
+              <p className="mb-1.5 text-[13px] font-bold text-[#2d3f52]">Turbinas: Tiempo Granallado Efectivo</p>
               <GanttChart data={chartData} />
             </div>
 
             {/* Tabla + barra */}
             <div className="grid grid-cols-[1fr_auto] items-start gap-4">
-              <div className="overflow-hidden rounded border border-[#dde3ec] text-[10px]">
+              <div className="overflow-hidden rounded border border-[#dde3ec] text-[12px]">
                 <div className="grid grid-cols-2 divide-x divide-[#dde3ec]">
 
                   {/* Consumo eléctrico */}
                   <div>
-                    <div className="border-b border-[#dde3ec] bg-[#e8eef6] px-3 py-1 text-center text-[10px] font-bold text-[#1a5fa8]">
+                    <div className="border-b border-[#dde3ec] bg-[#e8eef6] px-3 py-1 text-center text-[12px] font-bold text-[#1a5fa8]">
                       Consumo Eléctrico
                     </div>
                     <table className="w-full">
@@ -656,7 +656,7 @@ function ReporteContent() {
 
                   {/* Granallado efectivo */}
                   <div>
-                    <div className="border-b border-[#dde3ec] bg-[#e8eef6] px-3 py-1 text-center text-[10px] font-bold text-[#1a5fa8]">
+                    <div className="border-b border-[#dde3ec] bg-[#e8eef6] px-3 py-1 text-center text-[12px] font-bold text-[#1a5fa8]">
                       Granallado Efectivo
                     </div>
                     <table className="w-full">
@@ -705,8 +705,8 @@ function ReporteContent() {
 
               {/* Bar chart */}
               <div className="w-[280px] shrink-0">
-                <p className="mb-0.5 text-center text-[10px] font-bold text-[#2d3f52]">Tiempo de Granallado Efectivo</p>
-                <p className="mb-1 text-center text-[9px] text-[#8898a8]">% del día (24H)</p>
+                <p className="mb-0.5 text-center text-[12px] font-bold text-[#2d3f52]">Tiempo de Granallado Efectivo</p>
+                <p className="mb-1 text-center text-[11px] text-[#8898a8]">% del día (24H)</p>
                 <PctBarChart turbs={chartData.turbs} />
               </div>
             </div>
@@ -714,12 +714,12 @@ function ReporteContent() {
 
           {/* Footer */}
           <div className="flex items-center justify-between border-t border-[#dde3ec] bg-[#f5f7fa] px-5 py-2">
-            <p className="text-[9px] text-[#5a6a7a]">
+            <p className="text-[11px] text-[#5a6a7a]">
               <span className="font-semibold">CONTACTO IQgineer</span>
               {" · "}Ing. Miguel Rios{" · "}cel: 811 824 3178{" · "}email: miguel.rios@dooble-inox.de
               {" · "}www.dooble-inox.de
             </p>
-            <div className="rounded bg-[#2d3f52] px-3 py-1 text-[10px] font-black tracking-widest text-white">DOOBLE</div>
+            <div className="rounded bg-[#2d3f52] px-3 py-1 text-[12px] font-black tracking-widest text-white">DOOBLE</div>
           </div>
         </div>
       )}
