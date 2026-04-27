@@ -321,22 +321,7 @@ function PctBarChart({ turbs }: { turbs: Turb[] }) {
   );
 }
 
-function DoobleLogo() {
-  return (
-    <svg viewBox="0 0 148 44" className="h-9 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Logo mark – 4 overlapping circles */}
-      <circle cx="11"  cy="13" r="9" stroke="#1a3a5c" strokeWidth="2.2" />
-      <circle cx="22"  cy="13" r="9" stroke="#1a3a5c" strokeWidth="2.2" />
-      <circle cx="11"  cy="30" r="9" stroke="#1a3a5c" strokeWidth="2.2" />
-      <circle cx="22"  cy="30" r="9" stroke="#1a3a5c" strokeWidth="2.2" />
-      {/* Word mark */}
-      <text x="36" y="26" fontFamily="Arial Black, Arial, sans-serif" fontWeight="900"
-        fontSize="19" letterSpacing="1.5" fill="#1a3a5c">DOOBLE</text>
-      <text x="37" y="36" fontFamily="Arial, sans-serif" fontWeight="400"
-        fontSize="5.2" letterSpacing="1.8" fill="#5a6a7a">SURFACE PROCESS CONTROL</text>
-    </svg>
-  );
-}
+
 
 function MaqRow({ label, value, extra, extraVal, unit, highlight = false }: {
   label: string; value: string | number; extra: string;
@@ -370,6 +355,9 @@ function ReporteContent() {
     { enabled: numClienteId > 0 },
   );
 
+  // true cuando el cliente existe pero no tiene dispositivos vinculados a máquinas
+  const sinMaquina = !loadingMaq && (maquinasIoT?.length ?? 0) === 0;
+
   const selectedMaquinaId = maquinaParam
     ? parseInt(maquinaParam, 10)
     : (maquinasIoT?.[0]?.id_maquina ?? null);
@@ -383,6 +371,7 @@ function ReporteContent() {
   const ampMaximo = specs?.amp_maximo ?? 24;
   const ampIdeal  = ampMaximo > 0 ? Math.round(ampMaximo * 0.85) : 20;
 
+  // Query normal (con máquina)
   const { data: rawRows, isLoading: loadingDatos } = api.datos.getDatosMaquinaFecha.useQuery(
     {
       id_cliente: numClienteId,
@@ -391,6 +380,13 @@ function ReporteContent() {
     },
     { enabled: numClienteId > 0 && selectedMaquinaId != null },
   );
+
+  // Query fallback (sin máquina vinculada — solo AMP)
+  const { data: rawRowsCliente, isLoading: loadingDatosCliente } =
+    api.datos.getDatosClienteFecha.useQuery(
+      { id_cliente: numClienteId, fecha: fechaParam },
+      { enabled: numClienteId > 0 && sinMaquina },
+    );
 
   const { data: resumen30d } = api.datos.getResumen30Dias.useQuery(
     {
@@ -402,17 +398,19 @@ function ReporteContent() {
     { enabled: numClienteId > 0 && selectedMaquinaId != null },
   );
 
+  const efectiveRows = rawRows ?? rawRowsCliente;
+
   const chartData = useMemo(() => {
-    if (!rawRows?.length) return null;
-    return processData(rawRows, ampVacio);
-  }, [rawRows, ampVacio]);
+    if (!efectiveRows?.length) return null;
+    return processData(efectiveRows, ampVacio);
+  }, [efectiveRows, ampVacio]);
 
   function navigate(maquinaId: number, fecha: string) {
     void router.push(`/reporte-diario/${clienteId}?maquina=${maquinaId}&fecha=${fecha}`);
   }
 
-  const isLoading = loadingMaq || loadingDatos;
-  const clienteNombre = chartData?.cliente ?? maquinasIoT?.[0]?.maquina ?? `Cliente ${clienteId}`;
+  const isLoading = loadingMaq || loadingDatos || loadingDatosCliente;
+  const clienteNombre = chartData?.cliente ?? maquinasIoT?.[0]?.maquina ?? rawRowsCliente?.[0]?.cliente ?? `Cliente ${clienteId}`;
   const maquinaNombre = chartData?.maquina ?? (maquinasIoT?.find(m => m.id_maquina === selectedMaquinaId)?.maquina ?? "");
   const fechaDisplay  = new Date(fechaParam + "T12:00:00").toLocaleDateString("es-MX", {
     day: "2-digit", month: "2-digit", year: "numeric",
@@ -444,7 +442,10 @@ function ReporteContent() {
         <input
           type="date"
           value={fechaParam}
-          onChange={(e) => { if (selectedMaquinaId) navigate(selectedMaquinaId, e.target.value); }}
+          onChange={(e) => {
+            if (sinMaquina) void router.push(`/reporte-diario/${clienteId}?fecha=${e.target.value}`);
+            else if (selectedMaquinaId) navigate(selectedMaquinaId, e.target.value);
+          }}
           className="rounded border border-[#dde3ec] bg-white px-2 py-1 text-[11px] text-[#3d4f63] focus:border-[#1a5fa8] focus:outline-none"
         />
 
@@ -474,7 +475,7 @@ function ReporteContent() {
       )}
 
       {/* Sin datos para la fecha */}
-      {!isLoading && selectedMaquinaId && !chartData && (
+      {!isLoading && (selectedMaquinaId ?? sinMaquina) && !chartData && (
         <div className="mx-4 flex max-w-[1120px] flex-col items-center justify-center rounded-xl border border-dashed border-[#dde3ec] bg-white py-24 text-center sm:mx-auto">
           <svg className="mb-3 h-10 w-10 text-[#aab4c0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -484,13 +485,6 @@ function ReporteContent() {
             Sin datos de telemetría para el {fechaDisplay}
           </p>
           <p className="mt-1 text-xs text-[#aab4c0]">Selecciona otra fecha o verifica la conexión del dispositivo.</p>
-        </div>
-      )}
-
-      {/* Sin máquinas IoT configuradas */}
-      {!isLoading && !loadingMaq && maquinasIoT && maquinasIoT.length === 0 && (
-        <div className="mx-auto flex max-w-[1120px] flex-col items-center justify-center rounded-xl border border-dashed border-[#dde3ec] bg-white py-24 text-center px-4">
-          <p className="text-sm font-semibold text-[#8898a8]">Este cliente no tiene dispositivos IoT registrados.</p>
         </div>
       )}
 
@@ -504,9 +498,6 @@ function ReporteContent() {
               <h1 className="text-center text-[13px] font-extrabold tracking-wide text-[#2d3f52] uppercase">
                 REPORTE GRANALLADO DIARIO &nbsp;·&nbsp; {maquinaNombre}
               </h1>
-            </div>
-            <div className="flex shrink-0 items-center border-l border-[#dde3ec] px-4 py-2">
-              <DoobleLogo />
             </div>
           </div>
 

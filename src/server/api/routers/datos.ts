@@ -142,6 +142,53 @@ export const datosRouter = createTRPCRouter({
       }));
     }),
 
+  // Todos los datos de un cliente por fecha, sin requerir id_maquina.
+  // Útil cuando dispositivos.id_maquina es NULL (cliente sin máquina registrada).
+  getDatosClienteFecha: publicProcedure
+    .input(
+      z.object({
+        id_cliente: z.number().int().positive(),
+        fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { id_cliente, fecha } = input;
+      const nextDay = new Date(fecha + "T12:00:00Z");
+      nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+      const fechaNext = nextDay.toISOString().slice(0, 10);
+
+      const raw = await ctx.db.$queryRaw<RawDatoRow[]>`
+        SELECT
+          d.device_id,
+          d.ua, d.ub, d.uc,
+          d.ia, d.ib, d.ic,
+          d.time,
+          dis.id                                      AS id_dispositivo,
+          dis.nombre                                  AS dispositivo,
+          COALESCE(m.maquina_por_cliente, dis.nombre) AS maquina,
+          c.nombre                                    AS cliente
+        FROM Dooble.datos d
+        INNER JOIN Dooble.dispositivos  dis ON dis.id       = d.device_id
+        LEFT  JOIN Dooble.maquinas      m   ON m.id_maquina = dis.id_maquina
+        INNER JOIN Dooble.clientes      c   ON c.id_cliente = dis.id_cliente
+        WHERE dis.id_cliente = ${id_cliente}
+          AND d.time >= ${fecha}
+          AND d.time <  ${fechaNext}
+        ORDER BY d.device_id, d.time
+      `;
+
+      return raw.map((r): DatoRow => ({
+        device_id:      Number(r.device_id),
+        ua: toNum(r.ua), ub: toNum(r.ub), uc: toNum(r.uc),
+        ia: toNum(r.ia), ib: toNum(r.ib), ic: toNum(r.ic),
+        time:           toDate(r.time),
+        id_dispositivo: Number(r.id_dispositivo),
+        dispositivo:    r.dispositivo,
+        maquina:        r.maquina,
+        cliente:        r.cliente,
+      }));
+    }),
+
   // Replica la lógica de get_datos_por_fecha pero para TODOS los dispositivos
   // de la máquina en un solo query (evita N llamadas al procedimiento).
   getDatosMaquinaFecha: publicProcedure
