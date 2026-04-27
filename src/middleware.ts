@@ -13,7 +13,7 @@ export default async function middleware(req: NextRequest) {
   const session = await client.getSession(req);
 
   if (!session) {
-    return NextResponse.redirect(new URL("/auth/login", req.url));
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   return authRes;
@@ -21,6 +21,6 @@ export default async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|login|no-autorizado).*)",
+    "/((?!_next/static|_next/image|favicon.ico|login$|no-autorizado).*)",
   ],
 };
