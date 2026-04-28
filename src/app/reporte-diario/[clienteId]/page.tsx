@@ -58,11 +58,11 @@ function formatHHMM(totalMins: number): string {
 }
 
 // ─── Tipos para datos procesados ──────────────────────────────────────────────
-type Series = { key: string; color: string; pts: { t: number; v: number }[] };
+type Series = { key: string; color: string; isPrimary?: boolean; pts: { t: number; v: number }[] };
 type Turb   = {
   key: string; color: string;
-  kwh: number; kwhLoad: number; kwhUnload: number; kwhPerHr: number;
-  horas: number; pctDia: number;
+  kwh: number; kwhLoad: number; kwhNoload: number; kwhPerHr: number;
+  horasLoad: number; pctLoad: number;
   horasNoload: number; pctNoload: number; pctOff: number;
 };
 
@@ -89,7 +89,6 @@ type ChartData = {
   finOp: string;
   cliente: string;
   maquina: string;
-  deviceSpecs: DeviceSpecs;
 };
 
 // ─── Procesamiento de datos crudos ────────────────────────────────────────────
@@ -197,46 +196,43 @@ function processData(rows: DatoRow[], ampVacio: number, maxTurbinas?: number): C
       const v = ((r.ia ?? 0) + (r.ib ?? 0) + (r.ic ?? 0)) / 3;
       sumAmp += v; countAmp++;
     });
-    const horas       = activeMs / 3_600_000;
+    const horasLoad   = activeMs / 3_600_000;
     const horasNoload = unloadMs / 3_600_000;
     const kwhLoadR    = round1(kwhLoad);
-    const kwhUnloadR  = round1(kwhUnload);
-    const kwhPerHr    = horas > 0 ? round1(kwhLoadR / horas) : 0;
-    const pctLoad     = round1((horas / 24) * 100);
+    const kwhNoloadR  = round1(kwhUnload);
+    const kwhPerHr    = horasLoad > 0 ? round1(kwhLoadR / horasLoad) : 0;
+    const pctLoad     = round1((horasLoad / 24) * 100);
     const pctNoload   = round1((horasNoload / 24) * 100);
     return {
       key, color: colors[key]!,
       kwh:         round1(kwhLoad + kwhUnload),
       kwhLoad:     kwhLoadR,
-      kwhUnload:   kwhUnloadR,
+      kwhNoload:   kwhNoloadR,
       kwhPerHr,
-      horas:       round1(horas),
-      pctDia:      pctLoad,
+      horasLoad:   round1(horasLoad),
+      pctLoad,
       horasNoload: round1(horasNoload),
       pctNoload,
       pctOff:      round1(Math.max(0, 100 - pctLoad - pctNoload)),
     };
   });
 
-  const totalHoras     = turbs.reduce((s, t) => s + t.horas, 0);
-  const totalKwh       = round1(turbs.reduce((s, t) => s + t.kwh, 0));
-  const totalKwhLoad   = round1(turbs.reduce((s, t) => s + t.kwhLoad, 0));
-  const totalKwhUnload = round1(turbs.reduce((s, t) => s + t.kwhUnload, 0));
-  const pctLoad        = totalKwh > 0 ? round1((totalKwhLoad  / totalKwh) * 100) : 0;
-  const pctUnload      = totalKwh > 0 ? round1((totalKwhUnload / totalKwh) * 100) : 0;
-  const avgAmpMedio    = countAmp > 0 ? round1(sumAmp / countAmp) : 0;
+  const totalHorasLoad   = round1(turbs.reduce((s, t) => s + t.horasLoad, 0));
+  const totalHorasNoload = round1(turbs.reduce((s, t) => s + t.horasNoload, 0));
+  const totalKwh         = round1(turbs.reduce((s, t) => s + t.kwh, 0));
+  const totalKwhLoad     = round1(turbs.reduce((s, t) => s + t.kwhLoad, 0));
+  const totalKwhNoload   = round1(turbs.reduce((s, t) => s + t.kwhNoload, 0));
+  const pctLoad          = totalKwh > 0 ? round1((totalKwhLoad   / totalKwh) * 100) : 0;
+  const pctNoload        = totalKwh > 0 ? round1((totalKwhNoload / totalKwh) * 100) : 0;
+  const avgAmpMedio      = countAmp > 0 ? round1(sumAmp / countAmp) : 0;
 
   return {
     series, activeDots, colors, turbs,
-    totalKwh, totalKwhLoad, totalKwhUnload, pctLoad, pctUnload,
-    totalHoras: round1(totalHoras),
-    promHoras: turbs.length > 0 ? round1(totalHoras / turbs.length) : 0,
+    totalKwh, totalKwhLoad, totalKwhNoload, pctLoad, pctNoload,
+    totalHorasLoad, totalHorasNoload,
+    promHorasLoad: turbs.length > 0 ? round1(totalHorasLoad / turbs.length) : 0,
     avgAmpMedio,
-    tStart,
-    tTotal,
-    majorTicks,
-    minorTicks,
-    yMax,
+    tStart, tTotal, majorTicks, minorTicks, yMax,
     inicioOp, finOp,
     cliente: filteredRows[0]?.cliente ?? "",
     maquina: filteredRows[0]?.maquina ?? "",
@@ -245,15 +241,6 @@ function processData(rows: DatoRow[], ampVacio: number, maxTurbinas?: number): C
 
 function round1(n: number) {
   return Math.round(n * 10) / 10;
-}
-
-function round2(n: number) {
-  return Math.round(n * 100) / 100;
-}
-
-function fmtTime(d: Date | null): string {
-  if (!d) return "—";
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
 // ─── Sub-componentes de chart ─────────────────────────────────────────────────
@@ -686,7 +673,7 @@ function TripleStateChart({ turbs }: { turbs: Turb[] }) {
         })}
         {turbs.map((t, i) => {
           const x = startX + i * spacing;
-          const loadH   = (t.pctDia    / 100) * BPH;
+          const loadH   = (t.pctLoad    / 100) * BPH;
           const noloadH = (t.pctNoload / 100) * BPH;
           const offH    = BPH - loadH - noloadH;
           return (
@@ -702,7 +689,7 @@ function TripleStateChart({ turbs }: { turbs: Turb[] }) {
               {loadH > 8 && (
                 <text x={x + barW / 2} y={BMT + offH + noloadH + loadH / 2 + 3}
                   textAnchor="middle" fontSize={7.5} fontWeight="700" fill="#fff">
-                  {t.pctDia}%
+                  {t.pctLoad}%
                 </text>
               )}
               <text x={x + barW / 2} y={BMT + BPH + 12} textAnchor="middle" fontSize={7} fill="#3d4f63">
@@ -779,7 +766,10 @@ function ReporteContent() {
     { id_cliente: numClienteId },
     { enabled: numClienteId > 0 },
   );
-  const specs = maquinasSpecs?.find((m) => m.id_maquina === selectedMaquinaId);
+  const specs     = maquinasSpecs?.find((m) => m.id_maquina === selectedMaquinaId);
+  const ampVacio  = specs?.amp_vacio  ?? 5;
+  const ampMaximo = specs?.amp_maximo ?? 24;
+  const ampIdeal  = ampMaximo > 0 ? Math.round(ampMaximo * 0.85) : 20;
 
   const { data: rawRows, isLoading: loadingDatos } = api.datos.getDatosMaquinaFecha.useQuery(
     {
@@ -795,15 +785,6 @@ function ReporteContent() {
       { id_cliente: numClienteId, fecha: fechaParam },
       { enabled: numClienteId > 0 && sinMaquina },
     );
-
-  const { data: summaryDia } = api.datos.getSummaryDia.useQuery(
-    {
-      id_cliente: numClienteId,
-      id_maquina: selectedMaquinaId ?? 0,
-      fecha: fechaParam,
-    },
-    { enabled: numClienteId > 0 && (selectedMaquinaId != null || sinMaquina) },
-  );
 
   const { data: resumen30d } = api.datos.getResumen30Dias.useQuery(
     {
@@ -1033,21 +1014,21 @@ function ReporteContent() {
                   <tr className="border-b border-[#dde3ec]">
                     <td className="px-3 py-1 text-[#5a6a7a]">Inicio Op.</td>
                     <td className="px-3 py-1 text-right font-bold text-[#2d3f52]">
-                      {summaryGlobal ? fmtTime(summaryGlobal.inicio_func) : "—"}
+                      {chartData.inicioOp}
                     </td>
                     <td className="px-3 py-1 text-right text-[#566778]">—</td>
                   </tr>
                   <tr className="border-b border-[#dde3ec]">
                     <td className="px-3 py-1 text-[#5a6a7a]">Fin Op.</td>
                     <td className="px-3 py-1 text-right font-bold text-[#2d3f52]">
-                      {summaryGlobal ? fmtTime(summaryGlobal.fin_func) : "—"}
+                      {chartData.finOp}
                     </td>
                     <td className="px-3 py-1 text-right text-[#566778]">—</td>
                   </tr>
                   <tr className="border-b border-[#dde3ec]">
                     <td className="px-3 py-1 text-[#5a6a7a]">Consumo KWh</td>
                     <td className="px-3 py-1 text-right font-bold text-[#2d3f52]">
-                      {summaryGlobal ? summaryGlobal.kwh_total_general : chartData.totalKwh}
+                      {chartData.totalKwh}
                     </td>
                     <td className="px-3 py-1 text-right font-semibold text-[#566778]">
                       {resumen30d ? resumen30d.total_kwh : "—"}
@@ -1144,46 +1125,38 @@ function ReporteContent() {
                         </tr>
                       </thead>
                       <tbody>
-                        {chartData.turbs.map((t) => {
-                          const sp = summaryByDevice?.get(t.key);
-                          const totalKwh = sp ? sp.kwh_total_general : t.kwh;
-                          const loadKwh  = sp ? round2(sp.kwh_load_a  + sp.kwh_load_b  + sp.kwh_load_c)  : t.kwhLoad;
-                          const noloadKwh = sp ? round2(sp.kwh_noload_a + sp.kwh_noload_b + sp.kwh_noload_c) : t.kwhNoload;
-                          return (
-                            <tr key={t.key} className="border-b border-[#dde3ec]">
-                              <td className="px-2 py-1.5">
-                                <span
-                                  className="mr-1.5 inline-block h-2 w-2.5 rounded-sm"
-                                  style={{ background: t.color }}
-                                />
-                                {t.key}
-                              </td>
-                              <td className="px-2 py-1.5 text-right font-semibold text-[#2d3f52] tabular-nums">
-                                {totalKwh}
-                              </td>
-                              <td className="px-2 py-1.5 text-right font-semibold text-[#1a7a50] tabular-nums">
-                                {loadKwh}
-                              </td>
-                              <td className="px-2 py-1.5 text-right text-[#d4860a] tabular-nums">
-                                {noloadKwh}
-                              </td>
-                              <td className="px-2 py-1.5 text-right font-semibold text-[#1a7a50] tabular-nums">
-                                {t.kwhPerHr}
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        {chartData.turbs.map((t) => (
+                          <tr key={t.key} className="border-b border-[#dde3ec]">
+                            <td className="px-2 py-1.5">
+                              <span
+                                className="mr-1.5 inline-block h-2 w-2.5 rounded-sm"
+                                style={{ background: t.color }}
+                              />
+                              {t.key}
+                            </td>
+                            <td className="px-2 py-1.5 text-right font-semibold text-[#2d3f52] tabular-nums">
+                              {t.kwh}
+                            </td>
+                            <td className="px-2 py-1.5 text-right font-semibold text-[#1a7a50] tabular-nums">
+                              {t.kwhLoad}
+                            </td>
+                            <td className="px-2 py-1.5 text-right text-[#d4860a] tabular-nums">
+                              {t.kwhNoload}
+                            </td>
+                            <td className="px-2 py-1.5 text-right font-semibold text-[#1a7a50] tabular-nums">
+                              {t.kwhPerHr}
+                            </td>
+                          </tr>
+                        ))}
                         <tr className="border-t-2 border-[#b0bac8] bg-[#f0f4f8]">
                           <td className="px-2 py-1.5 font-bold text-[#2d3f52]">{maquinaNombre || "Total"}</td>
                           <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">{chartData.totalKwh}</td>
                           <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">{chartData.totalKwhLoad}</td>
-                          <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#566778]">{chartData.totalKwhUnload}</td>
+                          <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#566778]">{chartData.totalKwhNoload}</td>
                           <td />
                         </tr>
                         <tr className="border-t border-[#dde3ec] bg-[#f5f7fa]">
-                          <td className="px-2 py-1 text-[10px] text-[#aab4c0]">
-                            {summaryGlobal ? "√3·V·I·fp" : "medido"}
-                          </td>
+                          <td className="px-2 py-1 text-[10px] text-[#aab4c0]">medido</td>
                           <td />
                           <td className="px-2 py-1 text-right font-semibold text-[#1a9e5c] tabular-nums">
                             {chartData.pctLoad} %
@@ -1234,7 +1207,7 @@ function ReporteContent() {
                         <tr className="border-t-2 border-[#b0bac8] bg-[#f0f4f8]">
                           <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]">Promedio</td>
                           <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">
-                            {chartData.promHoras} h
+                            {chartData.promHorasLoad} h
                           </td>
                           <td />
                           <td className="px-2 py-1.5 text-right font-semibold text-[#1a5fa8] tabular-nums">
@@ -1244,7 +1217,7 @@ function ReporteContent() {
                         <tr className="border-t border-[#dde3ec] bg-[#f0f4f8]">
                           <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]">Total horas</td>
                           <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]" colSpan={2}>
-                            {chartData.totalHoras} h
+                            {chartData.totalHorasLoad} h
                           </td>
                           <td className="px-2 py-1.5 text-right font-bold text-[#d4860a] tabular-nums">
                             {chartData.totalHorasNoload} h
@@ -1264,84 +1237,6 @@ function ReporteContent() {
                 <TripleStateChart turbs={chartData.turbs} />
               </div>
             </div>
-          </div>
-
-            {/* Energía por Fase */}
-            {summaryDia && summaryDia.length > 0 && (
-              <div className="overflow-hidden rounded border border-[#dde3ec] text-[12px]">
-                <div className="border-b border-[#dde3ec] bg-[#e8eef6] px-3 py-1 text-center text-[12px] font-bold text-[#1a5fa8]">
-                  Energía por Fase &nbsp;
-                  <span className="font-normal text-[#8898a8]">(√3 · V · I · fp)</span>
-                </div>
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#dde3ec] bg-[#f5f7fa]">
-                      <th className="px-2 py-1 text-left font-semibold text-[#8898a8]">Dispositivo</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#1e6abf]">kWh A</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#7098c0]">Load A</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#7098c0]">NoLd A</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#dc2626]">kWh B</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#e07070]">Load B</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#e07070]">NoLd B</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#059669]">kWh C</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#60a07a]">Load C</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#60a07a]">NoLd C</th>
-                      <th className="px-2 py-1 text-right font-bold text-[#2d3f52]">Total</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">Inicio</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">Fin</th>
-                      <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">Hs Op.</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {summaryDia.map((s) => {
-                      const color = chartData.colors[s.dispositivo] ?? "#1e6abf";
-                      return (
-                        <tr key={s.id_dispositivo} className="border-b border-[#dde3ec]">
-                          <td className="px-2 py-1.5">
-                            <span className="mr-1.5 inline-block h-2 w-2.5 rounded-sm" style={{ background: color }} />
-                            {s.dispositivo}
-                          </td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#1e6abf]">{s.kwh_total_a}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{s.kwh_load_a}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{s.kwh_noload_a}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#dc2626]">{s.kwh_total_b}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{s.kwh_load_b}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{s.kwh_noload_b}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#059669]">{s.kwh_total_c}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{s.kwh_load_c}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{s.kwh_noload_c}</td>
-                          <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">{s.kwh_total_general}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{fmtTime(s.inicio_func)}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{fmtTime(s.fin_func)}</td>
-                          <td className="px-2 py-1.5 text-right tabular-nums text-[#566778]">{s.horas_trabajadas} h</td>
-                        </tr>
-                      );
-                    })}
-                    {summaryDia.length > 1 && (
-                      <tr className="border-t-2 border-[#b0bac8] bg-[#f0f4f8] font-bold">
-                        <td className="px-2 py-1.5 text-[#2d3f52]">Total</td>
-                        <td className="px-2 py-1.5 text-right tabular-nums text-[#1e6abf]">
-                          {round2(summaryDia.reduce((a, s) => a + s.kwh_total_a, 0))}
-                        </td>
-                        <td colSpan={2} />
-                        <td className="px-2 py-1.5 text-right tabular-nums text-[#dc2626]">
-                          {round2(summaryDia.reduce((a, s) => a + s.kwh_total_b, 0))}
-                        </td>
-                        <td colSpan={2} />
-                        <td className="px-2 py-1.5 text-right tabular-nums text-[#059669]">
-                          {round2(summaryDia.reduce((a, s) => a + s.kwh_total_c, 0))}
-                        </td>
-                        <td colSpan={2} />
-                        <td className="px-2 py-1.5 text-right tabular-nums text-[#2d3f52]">
-                          {summaryGlobal?.kwh_total_general}
-                        </td>
-                        <td colSpan={3} />
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
         </div>
       )}
