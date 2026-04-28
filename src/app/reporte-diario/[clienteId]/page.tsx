@@ -6,7 +6,7 @@ import { useMemo, Suspense } from "react";
 import { api } from "~/trpc/react";
 import type { DatoRow } from "~/server/api/routers/datos";
 
-// ─── Color palette para dispositivos ─────────────────────────────────────────
+// ─── Color palette para turbinas ─────────────────────────────────────────────
 const PALETTE = [
   "#1e6abf", "#00a87c", "#8a7200",
   "#9b27af", "#d4600a", "#0e7a8f", "#2e8b57", "#d63030",
@@ -19,12 +19,13 @@ const ML = 38, MR = 12, MT = 14, MB = 30;
 const PW = CW - ML - MR;
 const PH = CH - MT - MB;
 
+// Gantt — mismos márgenes horizontales que AmperageChart para alinear ejes de tiempo
 const GML = 38, GMR = 12, GMT = 8, GMB = 28;
 const GPW = CW - GML - GMR;
 const ROW_H = 26, ROW_GAP = 8;
 
-const BW = 280, BH = 150;
-const BML = 10, BMR = 10, BMT = 18, BMB = 28;
+const BW = 280, BH = 170;
+const BML = 10, BMR = 10, BMT = 18, BMB = 36;
 const BPW = BW - BML - BMR;
 const BPH = BH - BMT - BMB;
 
@@ -45,11 +46,12 @@ type Turb   = {
   key: string; color: string;
   kwh: number; kwhLoad: number; kwhUnload: number; kwhPerHr: number;
   horas: number; pctDia: number;
+  horasNoload: number; pctNoload: number; pctOff: number;
 };
 
 type ChartData = {
   series: Series[];
-  segments: Record<string, [number, number][]>;
+  activeDots: Record<string, number[]>;
   colors: Record<string, string>;
   turbs: Turb[];
   totalKwh: number; totalKwhLoad: number; totalKwhUnload: number;
@@ -62,12 +64,14 @@ type ChartData = {
   majorTicks: { offset: number; label: string }[];
   minorTicks: { offset: number }[];
   yMax: number;
+  inicioOp: string;
+  finOp: string;
   cliente: string;
   maquina: string;
 };
 
 // ─── Procesamiento de datos crudos ────────────────────────────────────────────
-function processData(rows: DatoRow[], ampVacio: number): ChartData {
+function processData(rows: DatoRow[], ampVacio: number, maxTurbinas?: number): ChartData {
   const byDevice = new Map<string, DatoRow[]>();
   for (const row of rows) {
     const key = row.dispositivo;
@@ -75,11 +79,34 @@ function processData(rows: DatoRow[], ampVacio: number): ChartData {
     byDevice.get(key)!.push(row);
   }
 
-  const deviceKeys = [...byDevice.keys()].sort();
+  let deviceKeys = [...byDevice.keys()].sort();
+  // Elimina dispositivos fantasma limitando al número real de turbinas
+  if (maxTurbinas != null && deviceKeys.length > maxTurbinas) {
+    deviceKeys = deviceKeys.slice(0, maxTurbinas);
+    for (const k of [...byDevice.keys()]) {
+      if (!deviceKeys.includes(k)) byDevice.delete(k);
+    }
+  }
+
   const colors: Record<string, string> = {};
   deviceKeys.forEach((k, i) => { colors[k] = PALETTE[i % PALETTE.length]!; });
 
-  const allTimes = rows.map((r) => minsFromMidnight(r.time));
+  const filteredRows = [...byDevice.values()]
+    .flat()
+    .sort((a, b) => a.time.getTime() - b.time.getTime());
+
+  // Inicio/Fin Op: primer y último registro del día con cualquier corriente ≠ 0
+  const nonZeroRows = filteredRows.filter(
+    r => (r.ia ?? 0) !== 0 || (r.ib ?? 0) !== 0 || (r.ic ?? 0) !== 0,
+  );
+  const inicioOp = nonZeroRows.length > 0
+    ? formatHHMM(minsFromMidnight(nonZeroRows[0]!.time))
+    : "—";
+  const finOp = nonZeroRows.length > 0
+    ? formatHHMM(minsFromMidnight(nonZeroRows[nonZeroRows.length - 1]!.time))
+    : "—";
+
+  const allTimes = filteredRows.map(r => minsFromMidnight(r.time));
   const rawTMin = allTimes.length ? Math.min(...allTimes) : 0;
   const rawTMax = allTimes.length ? Math.max(...allTimes) : 1440;
   const tStart = Math.max(0, Math.floor(rawTMin / 60) * 60 - 60);
@@ -96,40 +123,32 @@ function processData(rows: DatoRow[], ampVacio: number): ChartData {
 
   const series: Series[] = deviceKeys.map((key) => {
     const devRows = byDevice.get(key)!;
-    const pts = devRows.map((r) => ({
+    const pts = devRows.map(r => ({
       t: minsFromMidnight(r.time) - tStart,
       v: ((r.ia ?? 0) + (r.ib ?? 0) + (r.ic ?? 0)) / 3,
     }));
     return { key, color: colors[key]!, pts };
   });
 
-  const allAmps = series.flatMap((s) => s.pts.map((p) => p.v));
+  const allAmps = series.flatMap(s => s.pts.map(p => p.v));
   const yMax = Math.max(24, Math.ceil((Math.max(...allAmps, 0) + 2) / 4) * 4);
 
-  const segments: Record<string, [number, number][]> = {};
+  // Un punto por lectura LOAD en el Gantt; ancho = 0.5 min (1/2880 del día)
+  const activeDots: Record<string, number[]> = {};
   for (const [key, devRows] of byDevice) {
-    const segs: [number, number][] = [];
-    let segStart: number | null = null;
-    let prevT = 0;
-    for (const row of devRows) {
-      const t = minsFromMidnight(row.time) - tStart;
-      const avgI = ((row.ia ?? 0) + (row.ib ?? 0) + (row.ic ?? 0)) / 3;
-      const active = avgI > ampVacio;
-      if (active && segStart === null) segStart = t;
-      else if (!active && segStart !== null) { segs.push([segStart, prevT]); segStart = null; }
-      prevT = t;
-    }
-    if (segStart !== null) segs.push([segStart, prevT]);
-    segments[key] = segs;
+    activeDots[key] = devRows
+      .filter(r => ((r.ia ?? 0) + (r.ib ?? 0) + (r.ic ?? 0)) / 3 > ampVacio)
+      .map(r => minsFromMidnight(r.time) - tStart);
   }
 
   let sumAmp = 0, countAmp = 0;
   const turbs: Turb[] = deviceKeys.map((key) => {
     const devRows = byDevice.get(key)!;
-    let activeMs = 0, kwhLoad = 0, kwhUnload = 0;
+    let activeMs = 0, unloadMs = 0, kwhLoad = 0, kwhUnload = 0;
     for (let i = 0; i < devRows.length - 1; i++) {
       const r1 = devRows[i]!, r2 = devRows[i + 1]!;
-      const dtH = (r2.time.getTime() - r1.time.getTime()) / 3_600_000;
+      const dtMs = r2.time.getTime() - r1.time.getTime();
+      const dtH  = dtMs / 3_600_000;
       const ia = ((r1.ia ?? 0) + (r2.ia ?? 0)) / 2;
       const ib = ((r1.ib ?? 0) + (r2.ib ?? 0)) / 2;
       const ic = ((r1.ic ?? 0) + (r2.ic ?? 0)) / 2;
@@ -140,49 +159,56 @@ function processData(rows: DatoRow[], ampVacio: number): ChartData {
       const kwh  = ((ua * ia + ub * ib + uc * ic) / 1000) * dtH;
       if (avgI > ampVacio) {
         kwhLoad  += kwh;
-        activeMs += r2.time.getTime() - r1.time.getTime();
+        activeMs += dtMs;
       } else {
         kwhUnload += kwh;
+        unloadMs  += dtMs;
       }
     }
-    devRows.forEach((r) => {
+    devRows.forEach(r => {
       const v = ((r.ia ?? 0) + (r.ib ?? 0) + (r.ic ?? 0)) / 3;
       sumAmp += v; countAmp++;
     });
-    const horas   = activeMs / 3_600_000;
-    const totalKwhTurb = round1(kwhLoad + kwhUnload);
-    const kwhLoadR  = round1(kwhLoad);
-    const kwhUnloadR = round1(kwhUnload);
-    const kwhPerHr  = horas > 0 ? round1(kwhLoadR / horas) : 0;
+    const horas       = activeMs / 3_600_000;
+    const horasNoload = unloadMs / 3_600_000;
+    const kwhLoadR    = round1(kwhLoad);
+    const kwhUnloadR  = round1(kwhUnload);
+    const kwhPerHr    = horas > 0 ? round1(kwhLoadR / horas) : 0;
+    const pctLoad     = round1((horas / 24) * 100);
+    const pctNoload   = round1((horasNoload / 24) * 100);
     return {
       key, color: colors[key]!,
-      kwh:      totalKwhTurb,
-      kwhLoad:  kwhLoadR,
-      kwhUnload: kwhUnloadR,
+      kwh:         round1(kwhLoad + kwhUnload),
+      kwhLoad:     kwhLoadR,
+      kwhUnload:   kwhUnloadR,
       kwhPerHr,
-      horas:    round1(horas),
-      pctDia:   round1((horas / 24) * 100),
+      horas:       round1(horas),
+      pctDia:      pctLoad,
+      horasNoload: round1(horasNoload),
+      pctNoload,
+      pctOff:      round1(Math.max(0, 100 - pctLoad - pctNoload)),
     };
   });
 
-  const totalHoras    = turbs.reduce((s, t) => s + t.horas, 0);
-  const totalKwh      = round1(turbs.reduce((s, t) => s + t.kwh, 0));
-  const totalKwhLoad  = round1(turbs.reduce((s, t) => s + t.kwhLoad, 0));
+  const totalHoras     = turbs.reduce((s, t) => s + t.horas, 0);
+  const totalKwh       = round1(turbs.reduce((s, t) => s + t.kwh, 0));
+  const totalKwhLoad   = round1(turbs.reduce((s, t) => s + t.kwhLoad, 0));
   const totalKwhUnload = round1(turbs.reduce((s, t) => s + t.kwhUnload, 0));
-  const pctLoad   = totalKwh > 0 ? round1((totalKwhLoad  / totalKwh) * 100) : 0;
-  const pctUnload = totalKwh > 0 ? round1((totalKwhUnload / totalKwh) * 100) : 0;
-  const avgAmpMedio = countAmp > 0 ? round1(sumAmp / countAmp) : 0;
+  const pctLoad        = totalKwh > 0 ? round1((totalKwhLoad  / totalKwh) * 100) : 0;
+  const pctUnload      = totalKwh > 0 ? round1((totalKwhUnload / totalKwh) * 100) : 0;
+  const avgAmpMedio    = countAmp > 0 ? round1(sumAmp / countAmp) : 0;
 
   return {
-    series, segments, colors, turbs,
+    series, activeDots, colors, turbs,
     totalKwh, totalKwhLoad, totalKwhUnload, pctLoad, pctUnload,
     totalHoras: round1(totalHoras),
     promHoras: turbs.length > 0 ? round1(totalHoras / turbs.length) : 0,
     avgAmpMedio,
     tStart, tTotal, majorTicks, minorTicks,
     yMax,
-    cliente: rows[0]?.cliente ?? "",
-    maquina: rows[0]?.maquina ?? "",
+    inicioOp, finOp,
+    cliente: filteredRows[0]?.cliente ?? "",
+    maquina: filteredRows[0]?.maquina ?? "",
   };
 }
 
@@ -241,11 +267,13 @@ function AmperageChart({ data, ampMax, ampIdeal, ampVacio }: {
 }
 
 function GanttChart({ data }: { data: ChartData }) {
-  const { segments, colors, majorTicks, minorTicks, tTotal } = data;
-  const rowKeys = Object.keys(segments).sort().reverse();
+  const { activeDots, colors, majorTicks, minorTicks, tTotal } = data;
+  const rowKeys = Object.keys(activeDots).sort().reverse();
   const GH = GMT + rowKeys.length * (ROW_H + ROW_GAP) - ROW_GAP + GMB;
 
   function gx(t: number) { return GML + (t / tTotal) * GPW; }
+  // Ancho de cada punto proporcional a la frecuencia de registro: 1/(24*60*2) día = 0.5 min
+  const dotW = Math.max(1.5, (0.5 / tTotal) * GPW);
 
   return (
     <div className="overflow-hidden rounded border border-[#dde3ec] bg-[#fafbfc]">
@@ -261,13 +289,13 @@ function GanttChart({ data }: { data: ChartData }) {
         {rowKeys.map((key, rowIdx) => {
           const y = GMT + rowIdx * (ROW_H + ROW_GAP);
           const color = colors[key]!;
-          const segs = segments[key] ?? [];
+          const dots = activeDots[key] ?? [];
           return (
             <g key={key}>
               <rect x={GML} y={y} width={GPW} height={ROW_H} fill="#eff2f7" rx={2} />
-              {segs.map(([s, e], i) => (
-                <rect key={i} x={gx(s)} y={y} width={Math.max(1, gx(e) - gx(s))}
-                  height={ROW_H} fill={color} rx={1} />
+              {dots.map((t, i) => (
+                <rect key={i} x={gx(t) - dotW / 2} y={y} width={dotW}
+                  height={ROW_H} fill={color} rx={0.5} />
               ))}
               <text x={GML - 5} y={y + ROW_H / 2 + 3.5} textAnchor="end"
                 fontSize={8} fontWeight="700" fill="#3d4f63">{key}</text>
@@ -286,10 +314,11 @@ function GanttChart({ data }: { data: ChartData }) {
   );
 }
 
-function PctBarChart({ turbs }: { turbs: Turb[] }) {
+function TripleStateChart({ turbs }: { turbs: Turb[] }) {
   const barW = Math.floor((BPW - (turbs.length - 1) * 14) / turbs.length);
   const spacing = barW + 14;
   const startX = BML + (BPW - (turbs.length * barW + (turbs.length - 1) * 14)) / 2;
+  const legendY = BH - 10;
 
   return (
     <div className="overflow-hidden rounded border border-[#dde3ec] bg-[#fafbfc]">
@@ -301,27 +330,43 @@ function PctBarChart({ turbs }: { turbs: Turb[] }) {
         })}
         {turbs.map((t, i) => {
           const x = startX + i * spacing;
-          const bh = (t.pctDia / 100) * BPH;
-          const y = BMT + BPH - bh;
+          const loadH   = (t.pctDia    / 100) * BPH;
+          const noloadH = (t.pctNoload / 100) * BPH;
+          const offH    = BPH - loadH - noloadH;
           return (
             <g key={t.key}>
-              <rect x={x} y={y} width={barW} height={bh} fill={t.color} rx={2} />
-              <text x={x + barW / 2} y={y - 4} textAnchor="middle" fontSize={8} fontWeight="700" fill="#3d4f63">
-                {t.pctDia}
-              </text>
-              <text x={x + barW / 2} y={BMT + BPH + 15} textAnchor="middle" fontSize={7} fill="#3d4f63">
+              {/* OFF — sin registro */}
+              <rect x={x} y={BMT} width={barW} height={offH > 0 ? offH : 0} fill="#dde3ec" rx={2} />
+              {/* NOLOAD — encendida en vacío */}
+              <rect x={x} y={BMT + offH} width={barW} height={noloadH > 0 ? noloadH : 0}
+                fill={t.color} fillOpacity={0.38} />
+              {/* LOAD — granallado efectivo */}
+              <rect x={x} y={BMT + offH + noloadH} width={barW} height={loadH > 0 ? loadH : 0}
+                fill={t.color} />
+              {loadH > 8 && (
+                <text x={x + barW / 2} y={BMT + offH + noloadH + loadH / 2 + 3}
+                  textAnchor="middle" fontSize={7.5} fontWeight="700" fill="#fff">
+                  {t.pctDia}%
+                </text>
+              )}
+              <text x={x + barW / 2} y={BMT + BPH + 12} textAnchor="middle" fontSize={7} fill="#3d4f63">
                 {t.key.length > 8 ? t.key.slice(0, 8) + "…" : t.key}
               </text>
             </g>
           );
         })}
         <line x1={BML} y1={BMT + BPH} x2={BW - BMR} y2={BMT + BPH} stroke="#9aa8b8" strokeWidth={0.8} />
+        {/* Leyenda estados */}
+        <rect x={BML}      y={legendY - 5} width={8} height={8} fill={PALETTE[0]} />
+        <text x={BML + 10} y={legendY}     fontSize={6.5} fill="#5a6a7a">LOAD</text>
+        <rect x={BML + 36} y={legendY - 5} width={8} height={8} fill={PALETTE[0]} fillOpacity={0.38} />
+        <text x={BML + 46} y={legendY}     fontSize={6.5} fill="#5a6a7a">NOLOAD</text>
+        <rect x={BML + 92} y={legendY - 5} width={8} height={8} fill="#dde3ec" />
+        <text x={BML + 102} y={legendY}    fontSize={6.5} fill="#5a6a7a">OFF</text>
       </svg>
     </div>
   );
 }
-
-
 
 function MaqRow({ label, value, extra, extraVal, unit, highlight = false }: {
   label: string; value: string | number; extra: string;
@@ -355,7 +400,6 @@ function ReporteContent() {
     { enabled: numClienteId > 0 },
   );
 
-  // true cuando el cliente existe pero no tiene dispositivos vinculados a máquinas
   const sinMaquina = !loadingMaq && (maquinasIoT?.length ?? 0) === 0;
 
   const selectedMaquinaId = maquinaParam
@@ -371,7 +415,6 @@ function ReporteContent() {
   const ampMaximo = specs?.amp_maximo ?? 24;
   const ampIdeal  = ampMaximo > 0 ? Math.round(ampMaximo * 0.85) : 20;
 
-  // Query normal (con máquina)
   const { data: rawRows, isLoading: loadingDatos } = api.datos.getDatosMaquinaFecha.useQuery(
     {
       id_cliente: numClienteId,
@@ -381,7 +424,6 @@ function ReporteContent() {
     { enabled: numClienteId > 0 && selectedMaquinaId != null },
   );
 
-  // Query fallback (sin máquina vinculada — solo AMP)
   const { data: rawRowsCliente, isLoading: loadingDatosCliente } =
     api.datos.getDatosClienteFecha.useQuery(
       { id_cliente: numClienteId, fecha: fechaParam },
@@ -402,8 +444,8 @@ function ReporteContent() {
 
   const chartData = useMemo(() => {
     if (!efectiveRows?.length) return null;
-    return processData(efectiveRows, ampVacio);
-  }, [efectiveRows, ampVacio]);
+    return processData(efectiveRows, ampVacio, specs?.cantidad_turbinas ?? undefined);
+  }, [efectiveRows, ampVacio, specs?.cantidad_turbinas]);
 
   function navigate(maquinaId: number, fecha: string) {
     void router.push(`/reporte-diario/${clienteId}?maquina=${maquinaId}&fecha=${fecha}`);
@@ -514,16 +556,18 @@ function ReporteContent() {
             {/* Specs */}
             <table className="w-full">
               <tbody>
-                <MaqRow label="Máquina"      value={maquinaNombre}
+                <MaqRow label="Máquina"    value={maquinaNombre}
                   extra="Amp Máximo"  extraVal={ampMaximo}   unit="A" />
-                <MaqRow label="Dispositivos" value={chartData.series.length}
+                <MaqRow label="Turbinas"   value={chartData.turbs.length}
                   extra="Amp Ideal"   extraVal={ampIdeal}    unit="A"  highlight />
-                <MaqRow label="Voltaje"      value={specs ? "440" : "—"}
+                <MaqRow label="Voltaje"    value="440"
                   extra="Amp Vacío"   extraVal={ampVacio}    unit="A" />
                 {specs?.potencia_hp != null && (
                   <MaqRow label="Potencia HP" value={specs.potencia_hp}
                     extra="Turbinas"  extraVal={specs.cantidad_turbinas ?? "—"} unit="" />
                 )}
+                <MaqRow label="Inicio Op." value={chartData.inicioOp}
+                  extra="Fin Op."    extraVal={chartData.finOp} unit="" />
               </tbody>
             </table>
 
@@ -616,10 +660,10 @@ function ReporteContent() {
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-[#dde3ec] bg-[#f5f7fa]">
-                          <th className="px-2 py-1 text-left font-semibold text-[#8898a8]"></th>
+                          <th className="px-2 py-1 text-left font-semibold text-[#8898a8]">Turbina</th>
                           <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">kWh Total</th>
                           <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">LOAD</th>
-                          <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">UNLOAD</th>
+                          <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">NOLOAD</th>
                           <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">kWh/hr</th>
                         </tr>
                       </thead>
@@ -637,7 +681,7 @@ function ReporteContent() {
                           </tr>
                         ))}
                         <tr className="border-t-2 border-[#b0bac8] bg-[#f0f4f8]">
-                          <td className="px-2 py-1.5 font-bold text-[#2d3f52]">Total</td>
+                          <td className="px-2 py-1.5 font-bold text-[#2d3f52]">{maquinaNombre || "Total"}</td>
                           <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">{chartData.totalKwh}</td>
                           <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">{chartData.totalKwhLoad}</td>
                           <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#566778]">{chartData.totalKwhUnload}</td>
@@ -662,7 +706,7 @@ function ReporteContent() {
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-[#dde3ec] bg-[#f5f7fa]">
-                          <th className="px-2 py-1 text-left font-semibold text-[#8898a8]"></th>
+                          <th className="px-2 py-1 text-left font-semibold text-[#8898a8]">Turbina</th>
                           <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">horas</th>
                           <th className="px-2 py-1 text-right font-semibold text-[#8898a8]">% del día (24H)</th>
                         </tr>
@@ -679,9 +723,7 @@ function ReporteContent() {
                           </tr>
                         ))}
                         <tr className="border-t-2 border-[#b0bac8] bg-[#f0f4f8]">
-                          <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]" colSpan={1}>
-                            Promedio
-                          </td>
+                          <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]">Promedio</td>
                           <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]">
                             {chartData.promHoras} h
                           </td>
@@ -690,9 +732,7 @@ function ReporteContent() {
                           </td>
                         </tr>
                         <tr className="border-t border-[#dde3ec] bg-[#f0f4f8]">
-                          <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]" colSpan={1}>
-                            Total horas
-                          </td>
+                          <td className="px-2 py-1.5 font-semibold text-[#5a6a7a]">Total horas</td>
                           <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#2d3f52]" colSpan={2}>
                             {chartData.totalHoras} h
                           </td>
@@ -703,11 +743,11 @@ function ReporteContent() {
                 </div>
               </div>
 
-              {/* Bar chart */}
+              {/* Triple state chart */}
               <div className="w-[280px] shrink-0">
-                <p className="mb-0.5 text-center text-[10px] font-bold text-[#2d3f52]">Tiempo de Granallado Efectivo</p>
+                <p className="mb-0.5 text-center text-[10px] font-bold text-[#2d3f52]">Tiempo Activo por Turbina</p>
                 <p className="mb-1 text-center text-[9px] text-[#8898a8]">% del día (24H)</p>
-                <PctBarChart turbs={chartData.turbs} />
+                <TripleStateChart turbs={chartData.turbs} />
               </div>
             </div>
           </div>
