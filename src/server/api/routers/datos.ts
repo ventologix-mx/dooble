@@ -224,8 +224,8 @@ export const datosRouter = createTRPCRouter({
             END AS estado
           FROM Dooble.datos d
           INNER JOIN Dooble.dispositivos               dis ON dis.id         = d.device_id
-          WHERE dis.id_maquina = ${id_maquina}
-            AND dis.id_cliente = ${id_cliente}
+          WHERE dis.id_cliente = ${id_cliente}
+            AND (${id_maquina} = 0 OR dis.id_maquina = ${id_maquina})
             AND d.time >= ${fecha}
             AND d.time <  ${fechaNext}
         ) b

@@ -949,7 +949,7 @@ function ReporteContent() {
       id_maquina: selectedMaquinaId ?? 0,
       fecha: fechaParam,
     },
-    { enabled: numClienteId > 0 && selectedMaquinaId != null },
+    { enabled: numClienteId > 0 && (selectedMaquinaId != null || sinMaquina) },
   );
 
   const { data: resumen30d } = api.datos.getResumen30Dias.useQuery(
