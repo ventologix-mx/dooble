@@ -18,13 +18,6 @@ const PALETTE = [
   "#d63030",
 ];
 
-// ─── Colores por fase — A=azules, B=rojos/naranjas, C=verdes (hasta 4 dispositivos) ──
-const PHASE_COLORS: Record<"A" | "B" | "C", string[]> = {
-  A: ["#1e6abf", "#0369a1", "#4338ca", "#7c3aed"],
-  B: ["#dc2626", "#ea580c", "#c2410c", "#b45309"],
-  C: ["#059669", "#16a34a", "#0d9488", "#4d7c0f"],
-};
-
 // ─── Chart geometry ───────────────────────────────────────────────────────────
 const CW = 920;
 const CH = 224;
@@ -147,7 +140,7 @@ function processData(rows: DatoRow[], ampVacio: number, maxTurbinas?: number): C
   // Genera 3 series por dispositivo: A1/B1/C1, A2/B2/C2...
   // Cada fase tiene su familia de color (A=azul, B=rojo, C=verde)
   // La línea configurada (dis.linea) se muestra ligeramente más gruesa
-  const series: Series[] = deviceKeys.flatMap((key, devIdx) => {
+  const series: Series[] = deviceKeys.flatMap((key, _devIdx) => {
     const devRows = byDevice.get(key)!;
     const pts = devRows.map(r => ({
       t: minsFromMidnight(r.time) - tStart,

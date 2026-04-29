@@ -66,8 +66,7 @@ function FloatingDownloadButton({
     if (!targetRef.current || loading) return;
     setLoading(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const html2pdf = (await import("html2pdf.js") as any).default;
+      const html2pdf = ((await import("html2pdf.js")) as { default: Html2PdfFn }).default;
       await html2pdf()
         .set({
           margin: [8, 8, 8, 8],
@@ -112,7 +111,15 @@ function FloatingDownloadButton({
 
 // ─── main report ─────────────────────────────────────────────────────────────
 
+type Html2PdfInstance = {
+  set: (opts: Record<string, unknown>) => Html2PdfInstance;
+  from: (element: HTMLElement | null) => Html2PdfInstance;
+  save: () => Promise<void>;
+};
+type Html2PdfFn = () => Html2PdfInstance;
+
 function ReporteContent({ idVisita }: { idVisita: number }) {
+  const contentRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, isFetching, error } = api.visitas.getReporte.useQuery(
     { id_visita: idVisita },
     { retry: false },
@@ -266,7 +273,6 @@ function ReporteContent({ idVisita }: { idVisita: number }) {
       : Number(visita.kg_bodega ?? 0);
 
   // ── PDF filename ─────────────────────────────────────────────────────────
-  const contentRef = useRef<HTMLDivElement>(null);
   const pdfFilename = [
     (cliente?.nombre ?? "CLIENTE").replace(/\s+/g, "_").toUpperCase(),
     "REPORT",
